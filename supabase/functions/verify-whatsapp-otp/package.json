@@ -1,0 +1,10 @@
+{
+  "name": "verify-whatsapp-otp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baduma.sl Edge Function: verifies WhatsApp OTP (custom mode)",
+  "main": "index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0"
+  }
+}
