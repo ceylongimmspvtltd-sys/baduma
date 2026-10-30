@@ -43,8 +43,7 @@ export default function CustomerOTPLogin() {
     );
 
     if (data?.user) {
-      // Seamless redirect to profile upon verification
-      router.push('/profile');
+      router.push('/profile'); // Auto-redirect without lengthy forms
     } else {
       setErrorMsg(error?.message || 'Invalid verification code.');
       setLoading(false);
