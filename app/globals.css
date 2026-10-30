@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Base dark, neumorphic theme — complements app/layout.tsx */
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #121212;
+}
