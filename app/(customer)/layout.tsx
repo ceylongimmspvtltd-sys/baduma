@@ -21,10 +21,10 @@ export default function CustomerLayout({
             
             {/* Primary Logo */}
             <Link href="/" className="flex flex-col">
-              <span className="text-[#FFD700] font-black text-2xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              <span className="text-[#FFD700] font-black text-3xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                 බැදුම
               </span>
-              <span className="text-[10px] text-gray-400 tracking-widest font-semibold uppercase">
+              <span className="text-[10px] text-gray-400 tracking-widest font-semibold uppercase mt-1">
                 නගරේ රහට * ගානට
               </span>
             </Link>
@@ -40,7 +40,7 @@ export default function CustomerLayout({
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-4 py-2 text-sm font-semibold rounded-xl bg-[#121212] text-gray-300 shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:text-[#FFD700] hover:shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] transition-all duration-300"
+                  className="px-4 py-2 text-sm font-bold rounded-xl bg-[#121212] text-gray-400 shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:text-[#FFD700] hover:shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] transition-all duration-300"
                 >
                   {item.name}
                 </Link>
@@ -60,32 +60,32 @@ export default function CustomerLayout({
             
             {/* Brand Info */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
-              <h3 className="text-[#FFD700] text-xl font-bold mb-3 tracking-wide">Baduma.sl</h3>
-              <p className="text-xs text-[#FFD700]/80 mb-3 font-medium">බැදුම නගරේ රහට * ගානට</p>
-              <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-semibold">Sadun Chamila</span></p>
+              <h3 className="text-[#FFD700] text-xl font-black mb-2 tracking-wide">Baduma.sl</h3>
+              <p className="text-xs text-[#FFD700]/80 mb-4 font-bold">බැදුම නගරේ රහට * ගානට</p>
+              <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
               <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>
             </div>
 
             {/* Contact Details */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
-              <h3 className="text-[#FFD700] text-xl font-bold mb-3 tracking-wide">Contact Us</h3>
-              <p className="text-sm text-gray-300 mb-2">📞 +94 77 070 1682</p>
-              <p className="text-sm text-gray-300 mb-2">💬 +94 77 948 1682 (WhatsApp)</p>
-              <p className="text-sm text-gray-300 mt-3">✉️ Sadunchamila405@gmail.com</p>
+              <h3 className="text-[#FFD700] text-xl font-bold mb-4 tracking-wide">Contact Us</h3>
+              <p className="text-sm text-gray-300 mb-3 flex items-center gap-2"><span>📞</span> +94 77 070 1682</p>
+              <p className="text-sm text-gray-300 mb-3 flex items-center gap-2"><span>💬</span> +94 77 948 1682 (WhatsApp)</p>
+              <p className="text-sm text-gray-300 mt-4 flex items-center gap-2"><span>✉️</span> Sadunchamila405@gmail.com</p>
             </div>
 
             {/* Social & Maps Links */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] flex flex-col justify-between">
               <div>
-                <h3 className="text-[#FFD700] text-xl font-bold mb-3 tracking-wide">Connect Online</h3>
-                <div className="flex flex-col gap-4 mt-4">
-                  <a href="https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm text-gray-300 hover:text-[#FFD700] transition-all">
-                    <span>📍</span> Google Maps
+                <h3 className="text-[#FFD700] text-xl font-bold mb-4 tracking-wide">Connect Online</h3>
+                <div className="flex flex-col gap-4">
+                  <a href="https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#FFD700] transition-all">
+                    <span>📍</span> Google Maps Location
                   </a>
-                  <a href="https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm text-gray-300 hover:text-[#FFD700] transition-all">
+                  <a href="https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#FFD700] transition-all">
                     <span>📸</span> Instagram (@badum.sl)
                   </a>
-                  <a href="https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm text-gray-300 hover:text-[#FFD700] transition-all">
+                  <a href="https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#FFD700] transition-all">
                     <span>📘</span> Facebook Page
                   </a>
                 </div>

@@ -1,0 +1,11 @@
+{
+  "name": "send-whatsapp-otp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Baduma.sl Edge Function: sends WhatsApp OTP via Twilio",
+  "main": "index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "twilio": "^5.2.2"
+  }
+}
