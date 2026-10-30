@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BADUMA_MENU, getProductById, getAllProductIds, type Product } from '@/lib/products';
-import ProductDetailActions from '@/components/ProductDetailActions';
+import { getProductById, getAllProductIds, type Product } from '@/lib/products';
 
 export function generateStaticParams() {
   return getAllProductIds().map((id) => ({ id }));
@@ -27,88 +26,88 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="min-h-[70vh] py-6">
-      {/* Back to Menu */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#121212] text-gray-300 text-sm font-bold shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:text-[#FFD700] hover:shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] transition-all duration-300 mb-8"
-      >
-        ← Back to Menu
-      </Link>
+    <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 py-10">
+      
+      {/* Back Button */}
+      <div className="w-full max-w-4xl mb-6">
+        <Link href="/" className="inline-block px-6 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] text-gray-400 hover:text-[#FFD700] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] transition-all text-sm font-bold">
+          ← Back to Menu
+        </Link>
+      </div>
 
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Product Image — 3D Neumorphic Frame */}
-        <div className="relative w-full h-80 md:h-96 rounded-3xl overflow-hidden bg-[#121212] shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] border border-[#1d1d1d]">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover opacity-90"
-          />
-          <span className="absolute top-4 left-4 text-[10px] font-bold px-3 py-1.5 rounded-full bg-[#121212]/90 text-[#FFD700] shadow-[2px_2px_4px_#070707]">
-            {product.category}
-          </span>
+      <div className="w-full max-w-4xl bg-[#121212] rounded-[2.5rem] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d] overflow-hidden flex flex-col md:flex-row">
+        
+        {/* 3D Image Section */}
+        <div className="w-full md:w-1/2 p-6 md:p-10 flex items-center justify-center">
+          <div className="relative w-full aspect-square rounded-[2rem] bg-[#121212] shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] overflow-hidden">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover opacity-90 hover:scale-105 transition-transform duration-500"
+            />
+            <span className="absolute top-4 left-4 text-xs font-bold px-4 py-2 rounded-full bg-[#121212]/90 text-[#FFD700] shadow-[2px_2px_4px_#070707]">
+              {product.category}
+            </span>
+          </div>
         </div>
 
-        {/* Product Details */}
-        <div className="flex flex-col gap-6">
-          {/* Name + Description */}
+        {/* Product Details Section */}
+        <div className="w-full md:w-1/2 p-6 md:p-10 md:pl-0 flex flex-col justify-between">
           <div>
-            <h1 className="text-3xl font-black text-[#FFD700] mb-3 tracking-wide drop-shadow-md">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-100 mb-2 tracking-wide">
               {product.name}
             </h1>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <p className="text-sm text-gray-400 mb-6 leading-relaxed">
               {product.description}
             </p>
+
+            {/* Preparation Time */}
+            <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-[#121212] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]">
+              <span className="text-2xl">⏳</span>
+              <div>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Estimated Prep Time</p>
+                <p className="text-[#FFD700] font-black">{product.prepTime} Mins</p>
+              </div>
+            </div>
+
+            {/* Ingredients List */}
+            <div className="mb-8">
+              <h3 className="text-sm font-bold text-gray-400 mb-4 border-b border-[#1d1d1d] pb-2">Key Ingredients</h3>
+              <div className="flex flex-wrap gap-3">
+                {product.ingredients.map((item, idx) => (
+                  <span key={idx} className="px-4 py-2 rounded-xl text-xs font-bold text-gray-300 bg-[#121212] shadow-[3px_3px_6px_#070707,-3px_-3px_6px_#1d1d1d]">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Price Tiers */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Pricing & Add to Cart (Neumorphic Actions) */}
+          <div className="flex flex-col gap-4 pt-6 border-t border-[#1d1d1d]">
             {product.priceNormal && (
-              <div className="p-5 rounded-2xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] border border-[#1d1d1d]">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Normal</p>
-                <p className="text-2xl font-black text-[#FFD700]">Rs. {product.priceNormal}/=</p>
+              <div className="flex justify-between items-center px-4 py-3 rounded-xl bg-[#121212] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]">
+                <span className="text-sm font-bold text-gray-400">Normal Portion</span>
+                <span className="text-lg font-black text-[#FFD700]">Rs. {product.priceNormal}/=</span>
               </div>
             )}
             {product.priceFull && (
-              <div className="p-5 rounded-2xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] border border-[#1d1d1d]">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Full</p>
-                <p className="text-2xl font-black text-[#FFD700]">Rs. {product.priceFull}/=</p>
+              <div className="flex justify-between items-center px-4 py-3 rounded-xl bg-[#121212] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]">
+                <span className="text-sm font-bold text-gray-400">Full Portion</span>
+                <span className="text-lg font-black text-[#FFD700]">Rs. {product.priceFull}/=</span>
               </div>
             )}
-          </div>
 
-          {/* Preparation Time */}
-          <div className="p-5 rounded-2xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] border border-[#1d1d1d] flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] flex items-center justify-center text-2xl">
-              ⏱
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Preparation Time</p>
-              <p className="text-lg font-bold text-gray-100">{product.prepTime} minutes</p>
-            </div>
+            <Link
+              href="/cart"
+              className="mt-4 w-full py-5 rounded-2xl font-black text-[#121212] bg-[#FFD700] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#332b00] active:shadow-[inset_4px_4px_8px_#ccac00,inset_-4px_-4px_8px_#ffea4d] transition-all tracking-wider text-lg hover:brightness-110 text-center block"
+            >
+              Add to Cart
+            </Link>
           </div>
-
-          {/* Ingredients */}
-          <div className="p-5 rounded-2xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] border border-[#1d1d1d]">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Ingredients</p>
-            <ul className="flex flex-col gap-2">
-              {product.ingredients.map((ingredient, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-center gap-2 text-sm text-gray-300"
-                >
-                  <span className="text-[#8FBC8F] font-bold">✓</span>
-                  {ingredient}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Add to Cart Action */}
-          <ProductDetailActions product={product} />
         </div>
+
       </div>
     </div>
   );
