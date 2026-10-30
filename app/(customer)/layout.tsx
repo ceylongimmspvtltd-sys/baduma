@@ -1,4 +1,4 @@
-import './globals.css';
+import '../globals.css';
 import Link from 'next/link';
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
   description: 'බැදුම නගරේ රහට * ගානට - Premium food from Malgammana, Kandy',
 };
 
-export default function RootLayout({
+export default function CustomerLayout({
   children,
 }: {
   children: React.ReactNode;
