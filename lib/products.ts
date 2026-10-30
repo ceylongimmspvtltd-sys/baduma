@@ -1,0 +1,230 @@
+/**
+ * Baduma.sl — Shared product catalog
+ *
+ * Used by both the ProductMenu (grid) and the dynamic product detail page
+ * (`app/product/[id]/page.tsx`). Each product carries its image, price
+ * tiers, preparation time, and ingredient list.
+ */
+
+export interface Product {
+  id: string;
+  name: string;
+  category: 'Fried Rice' | 'Kottu' | 'Pasta' | 'Special';
+  priceNormal?: number;
+  priceFull?: number;
+  image: string;
+  prepTime: number; // minutes
+  ingredients: string[];
+  description: string;
+}
+
+export const BADUMA_MENU: Product[] = [
+  // ───────────────────────── Fried Rice ─────────────────────────
+  {
+    id: 'fr-1',
+    name: 'Vegetables Fried Rice',
+    category: 'Fried Rice',
+    priceNormal: 500,
+    priceFull: 750,
+    image: '/images/monday-bowl.jpg',
+    prepTime: 15,
+    description: 'A colorful wok-tossed fried rice loaded with fresh garden vegetables.',
+    ingredients: ['Steamed Rice', 'Carrots', 'Peas', 'Cabbage', 'Bell Pepper', 'Spring Onions', 'Garlic', 'Soy Sauce', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-2',
+    name: 'Egg Fried Rice',
+    category: 'Fried Rice',
+    priceNormal: 600,
+    priceFull: 850,
+    image: '/images/tuesday-bowl.jpg',
+    prepTime: 15,
+    description: 'Classic egg fried rice with scrambled eggs and aromatic garlic.',
+    ingredients: ['Steamed Rice', 'Eggs', 'Spring Onions', 'Garlic', 'Soy Sauce', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-3',
+    name: 'Fish Fried Rice',
+    category: 'Fried Rice',
+    priceNormal: 700,
+    priceFull: 1000,
+    image: '/images/wednesday-bowl.jpg',
+    prepTime: 20,
+    description: 'Flaked fish fried rice with a light garlicky aroma.',
+    ingredients: ['Steamed Rice', 'Fish', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-4',
+    name: 'Chicken Fried Rice',
+    category: 'Fried Rice',
+    priceNormal: 700,
+    priceFull: 1000,
+    image: '/images/thursday-bowl.jpg',
+    prepTime: 20,
+    description: 'Tender chicken pieces tossed into fragrant fried rice.',
+    ingredients: ['Steamed Rice', 'Chicken', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-5',
+    name: 'Seafood Fried Rice',
+    category: 'Fried Rice',
+    priceNormal: 1200,
+    priceFull: 1400,
+    image: '/images/friday-bowl.jpg',
+    prepTime: 25,
+    description: 'A decadent seafood fried rice with prawns and fish.',
+    ingredients: ['Steamed Rice', 'Prawns', 'Fish', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-6',
+    name: 'Mixed Fried Rice',
+    category: 'Fried Rice',
+    priceNormal: 1200,
+    priceFull: 1400,
+    image: '/images/monday-bowl.jpg',
+    prepTime: 25,
+    description: 'Everything-in-the-wok fried rice with chicken, fish, and vegetables.',
+    ingredients: ['Steamed Rice', 'Chicken', 'Fish', 'Vegetables', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-7',
+    name: 'Set Menu',
+    category: 'Fried Rice',
+    priceNormal: 1000,
+    priceFull: 1300,
+    image: '/images/tuesday-bowl.jpg',
+    prepTime: 25,
+    description: 'A complete set meal with fried rice and curd sambal.',
+    ingredients: ['Steamed Rice', 'Chicken', 'Fish', 'Vegetables', 'Curd Sambal', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'fr-8',
+    name: 'Nasigurang',
+    category: 'Fried Rice',
+    priceNormal: 1100,
+    priceFull: 1400,
+    image: '/images/wednesday-bowl.jpg',
+    prepTime: 25,
+    description: 'Sri Lankan nasi gureng with rich rempah and coconut milk.',
+    ingredients: ['Rice', 'Chicken', 'Eggs', 'Vegetables', 'Rempah', 'Coconut Milk', 'Salt'],
+  },
+  {
+    id: 'fr-9',
+    name: 'Biriyani',
+    category: 'Fried Rice',
+    priceNormal: 1200,
+    priceFull: 1500,
+    image: '/images/thursday-bowl.jpg',
+    prepTime: 30,
+    description: 'Aromatic biriyani layered with chicken, spices, and saffron rice.',
+    ingredients: ['Rice', 'Chicken', 'Biryani Masala', 'Yoghurt', 'Onions', 'Cashew', 'Raisins', 'Mint', 'Salt'],
+  },
+
+  // ───────────────────────── Kottu ─────────────────────────
+  {
+    id: 'kt-1',
+    name: 'Chicken Kottu (Normal)',
+    category: 'Kottu',
+    priceNormal: 700,
+    priceFull: 950,
+    image: '/images/friday-bowl.jpg',
+    prepTime: 20,
+    description: 'The iconic kottu rotti shredded and fried with chicken.',
+    ingredients: ['Kottu Rotti', 'Chicken', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'kt-2',
+    name: 'Chicken Kottu (Special/Extra)',
+    category: 'Kottu',
+    priceNormal: 700,
+    priceFull: 950,
+    image: '/images/monday-bowl.jpg',
+    prepTime: 20,
+    description: 'Special chicken kottu with an extra egg and richer gravy.',
+    ingredients: ['Kottu Rotti', 'Chicken', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Egg', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'kt-3',
+    name: 'Seafood Kottu',
+    category: 'Kottu',
+    priceNormal: 1000,
+    priceFull: 1300,
+    image: '/images/tuesday-bowl.jpg',
+    prepTime: 25,
+    description: 'Kottu with prawns and fish in a spicy gravy.',
+    ingredients: ['Kottu Rotti', 'Prawns', 'Fish', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'kt-4',
+    name: 'Mixed Kottu',
+    category: 'Kottu',
+    priceNormal: 1300,
+    priceFull: 1700,
+    image: '/images/wednesday-bowl.jpg',
+    prepTime: 25,
+    description: 'A hearty mixed kottu with chicken, beef, and vegetables.',
+    ingredients: ['Kottu Rotti', 'Chicken', 'Beef', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'kt-5',
+    name: 'Beef Kottu',
+    category: 'Kottu',
+    priceNormal: 1000,
+    priceFull: 1250,
+    image: '/images/thursday-bowl.jpg',
+    prepTime: 25,
+    description: 'Succulent beef kottu with a deeply savoury gravy.',
+    ingredients: ['Kottu Rotti', 'Beef', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'kt-6',
+    name: 'Cheese Kottu',
+    category: 'Kottu',
+    priceNormal: 1100,
+    priceFull: 1500,
+    image: '/images/friday-bowl.jpg',
+    prepTime: 20,
+    description: 'Kottu rotti tossed in melted cheese and vegetables.',
+    ingredients: ['Kottu Rotti', 'Cheese', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'kt-7',
+    name: 'Lava Kottu',
+    category: 'Kottu',
+    priceFull: 2000,
+    image: '/images/monday-bowl.jpg',
+    prepTime: 25,
+    description: 'The ultimate lava kottu — molten cheese with chicken and veg.',
+    ingredients: ['Kottu Rotti', 'Cheese', 'Chicken', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
+  },
+
+  // ───────────────────────── Pasta ─────────────────────────
+  {
+    id: 'ps-1',
+    name: 'Baduma Special Pasta',
+    category: 'Pasta',
+    priceNormal: 1000,
+    image: '/images/tuesday-bowl.jpg',
+    prepTime: 20,
+    description: 'Our signature pasta with chicken in a creamy garlic parmesan sauce.',
+    ingredients: ['Pasta', 'Chicken', 'Cream', 'Garlic', 'Parmesan', 'Tomato', 'Basil', 'Salt', 'Pepper'],
+  },
+  {
+    id: 'ps-2',
+    name: 'Chilly Pasta',
+    category: 'Pasta',
+    priceNormal: 1000,
+    image: '/images/wednesday-bowl.jpg',
+    prepTime: 20,
+    description: 'A spicy chilli pasta with crisp green peppers and garlic.',
+    ingredients: ['Pasta', 'Green Peppers', 'Garlic', 'Chilli Flakes', 'Soy Sauce', 'Salt'],
+  },
+];
+
+export function getProductById(id: string): Product | undefined {
+  return BADUMA_MENU.find((p) => p.id === id);
+}
+
+export function getAllProductIds(): string[] {
+  return BADUMA_MENU.map((p) => p.id);
+}
