@@ -5,17 +5,17 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function CustomerOTPLogin() {
-  const [identifier, setIdentifier] = useState(''); // Phone number or Email
+  const [identifier, setIdentifier] = useState('');
   const [token, setToken] = useState('');
   const [step, setStep] = useState<'request' | 'verify'>('request');
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage('');
+    setErrorMsg('');
     
     const isEmail = identifier.includes('@');
     const { error } = isEmail 
@@ -25,7 +25,7 @@ export default function CustomerOTPLogin() {
     if (!error) {
       setStep('verify');
     } else {
-      setErrorMessage(error.message);
+      setErrorMsg(error.message);
     }
     setLoading(false);
   };
@@ -33,7 +33,7 @@ export default function CustomerOTPLogin() {
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage('');
+    setErrorMsg('');
 
     const isEmail = identifier.includes('@');
     const { data, error } = await supabase.auth.verifyOtp(
@@ -43,10 +43,9 @@ export default function CustomerOTPLogin() {
     );
 
     if (data?.user) {
-      // Seamless redirect to profile without forcing upfront forms
       router.push('/profile');
     } else {
-      setErrorMessage(error?.message || 'Verification failed. Please check your code.');
+      setErrorMsg(error?.message || 'Invalid verification code.');
       setLoading(false);
     }
   };
@@ -57,80 +56,47 @@ export default function CustomerOTPLogin() {
         
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-[#FFD700] mb-2 tracking-wide">
-            {step === 'request' ? 'Customer Sign In' : 'Enter Verification Code'}
+            {step === 'request' ? 'Sign In / Register' : 'Verify Account'}
           </h2>
           <p className="text-xs text-gray-400">
             {step === 'request' 
-              ? 'Enter your mobile number or email for instant access' 
-              : `We sent a 6-digit code to ${identifier}`}
+              ? 'Enter Phone Number or Email to receive an OTP' 
+              : `Code sent to ${identifier}`}
           </p>
         </div>
         
         {step === 'request' ? (
           <form onSubmit={handleSendOTP} className="flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider pl-1">
-                Phone Number or Email
-              </label>
-              <input
-                type="text"
-                placeholder="+94 77 000 0000 or email@domain.com"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-[#121212] text-white outline-none shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] focus:shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] transition-all text-sm"
-                required
-              />
-            </div>
-
-            {errorMessage && (
-              <p className="text-red-500 text-xs text-center bg-red-500/10 py-2 rounded-lg">{errorMessage}</p>
-            )}
-
-            <button 
-              disabled={loading} 
-              className="mt-2 w-full py-4 rounded-xl font-bold text-[#121212] bg-[#FFD700] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#332b00] active:shadow-[inset_3px_3px_6px_#ccac00,inset_-3px_-3px_6px_#ffea4d] transition-all disabled:opacity-50"
-            >
+            <input
+              type="text"
+              placeholder="+94 77 000 0000 or email@domain.com"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              className="w-full px-4 py-4 rounded-xl bg-[#121212] text-white outline-none shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] focus:shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] transition-all text-sm"
+              required
+            />
+            {errorMsg && <p className="text-red-500 text-xs text-center">{errorMsg}</p>}
+            <button disabled={loading} className="w-full py-4 rounded-xl font-bold text-[#121212] bg-[#FFD700] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#332b00] active:shadow-[inset_3px_3px_6px_#ccac00,inset_-3px_-3px_6px_#ffea4d] transition-all">
               {loading ? 'Sending OTP...' : 'Send Secure OTP'}
             </button>
           </form>
         ) : (
           <form onSubmit={handleVerifyOTP} className="flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider pl-1 text-center">
-                Verification Code
-              </label>
-              <input
-                type="text"
-                placeholder="000000"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-[#121212] text-white text-center tracking-[0.5em] font-mono text-xl outline-none shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] focus:shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] transition-all"
-                maxLength={6}
-                required
-              />
-            </div>
-
-            {errorMessage && (
-              <p className="text-red-500 text-xs text-center bg-red-500/10 py-2 rounded-lg">{errorMessage}</p>
-            )}
-
-            <button 
-              disabled={loading} 
-              className="mt-2 w-full py-4 rounded-xl font-bold text-[#121212] bg-[#FFD700] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#332b00] active:shadow-[inset_3px_3px_6px_#ccac00,inset_-3px_-3px_6px_#ffea4d] transition-all disabled:opacity-50"
-            >
+            <input
+              type="text"
+              placeholder="000000"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              className="w-full px-4 py-4 rounded-xl bg-[#121212] text-white text-center tracking-[0.5em] font-mono text-xl outline-none shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] transition-all"
+              maxLength={6}
+              required
+            />
+            {errorMsg && <p className="text-red-500 text-xs text-center">{errorMsg}</p>}
+            <button disabled={loading} className="w-full py-4 rounded-xl font-bold text-[#121212] bg-[#FFD700] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#332b00] active:shadow-[inset_3px_3px_6px_#ccac00,inset_-3px_-3px_6px_#ffea4d] transition-all">
               {loading ? 'Verifying...' : 'Verify & Enter Profile'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => { setStep('request'); setToken(''); }}
-              className="text-xs text-gray-400 hover:text-[#FFD700] text-center mt-2 transition-colors"
-            >
-              ← Change phone number or email
             </button>
           </form>
         )}
-
       </div>
     </div>
   );
