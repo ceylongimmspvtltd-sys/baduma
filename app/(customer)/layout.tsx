@@ -15,11 +15,11 @@ export default function CustomerLayout({
     <html lang="en">
       <body className="bg-[#121212] text-gray-200 font-sans min-h-screen flex flex-col selection:bg-[#FFD700] selection:text-[#121212]">
         
-        {/* Secure Public Navigation (Strictly Isolated - No Admin/Staff Links) */}
+        {/* Secure Public Navigation (Strictly Isolated - No Admin Links) */}
         <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d]">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
             
-            {/* Primary Typography Logo */}
+            {/* Primary Logo */}
             <Link href="/" className="flex flex-col">
               <span className="text-[#FFD700] font-black text-3xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                 බැදුම {/*[cite: 4] */}
