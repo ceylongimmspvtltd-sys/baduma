@@ -43,7 +43,6 @@ export default function CustomerOTPLogin() {
     );
 
     if (data?.user) {
-      // Instant redirect to profile upon OTP verification (Frictionless)
       router.push('/profile');
     } else {
       setErrorMsg(error?.message || 'Invalid verification code.');
@@ -57,11 +56,11 @@ export default function CustomerOTPLogin() {
 
         <div className="text-center mb-10">
           <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-md">
-            {step === 'request' ? 'Sign In' : 'Verify'}
+            {step === 'request' ? 'Sign In / Register' : 'Verify Account'}
           </h2>
           <p className="text-sm text-gray-400 font-medium">
             {step === 'request'
-              ? 'Enter Phone Number or Email'
+              ? 'Enter Mobile Number or Email'
               : `Secure code sent to ${identifier}`}
           </p>
         </div>
