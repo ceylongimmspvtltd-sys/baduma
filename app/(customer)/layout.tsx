@@ -20,7 +20,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     <html lang="en">
       <body className="bg-[#121212] text-gray-200 font-sans min-h-screen flex flex-col selection:bg-[#FFD700] selection:text-[#121212]">
 
-        {/* Secure Public Navigation (Strictly Isolated - No Admin Links) */}
+        {/* Secure Public Navigation (Strictly Isolated - No Admin/Staff/POS/Driver Links) */}
         <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d]">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
             <Link href="/" className="flex flex-col">
@@ -37,53 +37,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           </div>
         </nav>
 
-        {/* Hero Section (4:3 Aspect Ratio Landscape Cover Banner) */}
-        <header className="max-w-5xl mx-auto w-full px-4 mb-16">
-          <div className="relative aspect-[4/3] w-full rounded-[2.5rem] overflow-hidden shadow-[20px_20px_40px_#070707,-20px_-20px_40px_#1d1d1d] border-4 border-[#1d1d1d] bg-[#1A1A1A] flex flex-col justify-between p-8 md:p-12">
-
-            {/* Background Image & Overlay */}
-            <div className="absolute inset-0 bg-[url('/restaurant-cover.jpg')] bg-cover bg-center opacity-40"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/60 to-transparent"></div>
-
-            {/* Top Brand Info */}
-            <div className="relative z-10 flex justify-between items-start">
-              <div>
-                <h1 className="text-4xl md:text-6xl font-black text-[#FFD700] tracking-tight drop-shadow-md">Baduma.sl</h1>
-              </div>
-            </div>
-
-            {/* Middle Tagline with Specified Colors (No Commas, Clean Styling) */}
-            <div className="relative z-10 my-auto text-center px-2">
-              <h2 className="text-xl md:text-3xl font-extrabold tracking-wide drop-shadow-lg leading-relaxed">
-                <span className="text-red-500">Hot</span> <span className="text-[#FFD700]">Taste the Flavors</span> and Delivered <span className="text-green-500">Fast</span> <span className="text-blue-400">to Your Doorstep</span>
-              </h2>
-            </div>
-
-            {/* Bottom Minimal Social & Contact Icons (No Background Buttons, Just Icons) */}
-            <div className="relative z-10 flex justify-between items-center pt-4 border-t border-gray-800/60">
-              <div className="flex items-center gap-6">
-                <a href="https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#FFD700] text-2xl transition-colors">
-                  📘
-                </a>
-                <a href="https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#FFD700] text-2xl transition-colors">
-                  📸
-                </a>
-                <a href="https://wa.me/94779481682" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#FFD700] text-2xl transition-colors">
-                  💬
-                </a>
-                <a href="https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-[#FFD700] text-2xl transition-colors">
-                  📍
-                </a>
-                <a href="tel:+94770701682" className="text-gray-300 hover:text-[#FFD700] text-2xl transition-colors">
-                  📞
-                </a>
-              </div>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest hidden md:inline-block">Malgammana, Kandy</span>
-            </div>
-
-          </div>
-        </header>
-
         {/* Main Content */}
         <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-6">
           {children}
@@ -92,17 +45,23 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         {/* 3D Neumorphic Permanent Footer */}
         <footer className="mt-16 bg-[#121212] p-8 md:p-12 shadow-[inset_8px_8px_16px_#070707,inset_-8px_-8px_16px_#1d1d1d] rounded-t-[2.5rem] mx-3 border-t border-[#1d1d1d]">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            {/* Brand Info */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
               <h3 className="text-[#FFD700] text-xl font-black mb-2 tracking-wide">Baduma.sl</h3>
               <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
               <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>
             </div>
+
+            {/* Contact Details */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
               <h3 className="text-[#FFD700] text-xl font-bold mb-4 tracking-wide">Contact Us</h3>
               <p className="text-sm text-gray-300 mb-3 flex items-center gap-2"><span>📞</span> +94 77 070 1682</p>
               <p className="text-sm text-gray-300 mb-3 flex items-center gap-2"><span>💬</span> +94 77 948 1682 (WhatsApp)</p>
               <p className="text-sm text-gray-300 mt-4 flex items-center gap-2"><span>✉️</span> Sadunchamila405@gmail.com</p>
             </div>
+
+            {/* Social & Maps Links */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] flex flex-col justify-between">
               <div>
                 <h3 className="text-[#FFD700] text-xl font-bold mb-4 tracking-wide">Connect Online</h3>
