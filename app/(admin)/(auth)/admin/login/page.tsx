@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseAdmin as supabase } from "@/lib/supabaseAdminClient";
 
 /**
  * Backend sign-in form.

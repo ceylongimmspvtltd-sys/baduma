@@ -43,6 +43,31 @@ alter table public.employees
   add column if not exists contact text,
   add column if not exists updated_at timestamptz not null default now();
 
+-- Restaurant profile (Admin → Settings) + reward spend ledger.
+create table if not exists public.settings (
+  key         text primary key,
+  value       text not null default '',
+  updated_at  timestamptz not null default now()
+);
+
+insert into public.settings (key, value) values
+  ('restaurant_name', 'බැදුම'),
+  ('phone',   '+94 77 070 1682'),
+  ('whatsapp','+94 77 948 1682'),
+  ('email',   'Sadunchamila405@gmail.com'),
+  ('address', 'Baduma.malgammana, Pilimatalawa, Kandy')
+on conflict (key) do nothing;
+
+create table if not exists public.reward_redemptions (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  reward_id   text not null,
+  cost        integer not null check (cost > 0),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists reward_redemptions_user_idx on public.reward_redemptions (user_id);
+
 -- ---------------------------------------------------------------------
 -- 2. Functions
 -- ---------------------------------------------------------------------
@@ -75,6 +100,16 @@ begin
 end;
 $$;
 
+/**
+ * `profiles.points` is server-owned.
+ *
+ * Allowed writers:
+ *   - admins (is_admin) and the service role,
+ *   - the loyalty RPCs, which set the transaction-local flag
+ *     `baduma.points_bypass` before touching the balance.
+ * Everything else (i.e. a customer PATCHing their own row through PostgREST) is
+ * rejected — previously `points` was freely client-writable.
+ */
 create or replace function public.protect_profile_points()
 returns trigger
 language plpgsql
@@ -84,9 +119,10 @@ as $$
 begin
   if new.points is distinct from old.points
      and not public.is_admin()
-     and coalesce(auth.jwt() ->> 'role', '') <> 'service_role'
+     and coalesce(auth.role(), '') <> 'service_role'
+     and coalesce(current_setting('baduma.points_bypass', true), '') <> '1'
   then
-    raise exception 'points are managed by complete_loyalty_task()' using errcode = '42501';
+    raise exception 'points are managed by the loyalty RPCs' using errcode = '42501';
   end if;
   return new;
 end;
@@ -121,6 +157,9 @@ begin
     raise exception 'unknown loyalty task: %', p_task using errcode = '22023';
   end if;
 
+  -- Allow this transaction to move `points` past the protection trigger.
+  perform set_config('baduma.points_bypass', '1', true);
+
   insert into public.loyalty_events (user_id, task, points)
   values (v_uid, p_task, v_award)
   on conflict (user_id, task) do nothing;
@@ -142,6 +181,57 @@ begin
   return coalesce(v_points, 0);
 end;
 $$;
+
+create or replace function public.redeem_loyalty_reward(p_reward_id text, p_cost integer)
+returns integer
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid    uuid := auth.uid();
+  v_cost   integer;
+  v_points integer;
+begin
+  if v_uid is null then
+    raise exception 'not authenticated' using errcode = '42501';
+  end if;
+
+  v_cost := case p_reward_id
+    when 'r1' then 300
+    when 'r2' then 500
+    when 'r3' then 800
+    when 'r4' then 1500
+    else null
+  end;
+
+  if v_cost is null then
+    raise exception 'unknown reward: %', p_reward_id using errcode = '22023';
+  end if;
+
+  -- Allow this transaction to move `points` past the protection trigger.
+  perform set_config('baduma.points_bypass', '1', true);
+
+  update public.profiles
+     set points = points - v_cost,
+         updated_at = now()
+   where user_id = v_uid
+     and points >= v_cost
+  returning points into v_points;
+
+  if v_points is null then
+    raise exception 'not enough points' using errcode = '22000';
+  end if;
+
+  insert into public.reward_redemptions (user_id, reward_id, cost)
+  values (v_uid, p_reward_id, v_cost);
+
+  return v_points;
+end;
+$$;
+
+revoke all on function public.redeem_loyalty_reward(text, integer) from public, anon;
+grant execute on function public.redeem_loyalty_reward(text, integer) to authenticated;
 
 create or replace function public.get_employee_by_username(p_username text)
 returns table (
@@ -187,6 +277,8 @@ alter table public.profiles        enable row level security;
 alter table public.loyalty_events  enable row level security;
 alter table public.employees       enable row level security;
 alter table public.admin_users     enable row level security;
+alter table public.settings        enable row level security;
+alter table public.reward_redemptions enable row level security;
 
 -- Menu: public read of *active* rows (the previous policies only allowed
 -- `authenticated`, so anonymous visitors and the pre-login storefront could
@@ -269,6 +361,21 @@ create policy "admin_users_admin_read" on public.admin_users
   for select to authenticated using (public.is_admin());
 revoke all on public.admin_users from anon, authenticated;
 grant select, insert, update, delete on public.admin_users to service_role;
+
+-- Settings: public read, service-role writes only.
+drop policy if exists "settings_public_read" on public.settings;
+create policy "settings_public_read" on public.settings
+  for select to anon, authenticated using (true);
+revoke insert, update, delete on public.settings from anon, authenticated;
+grant select on public.settings to anon, authenticated;
+grant select, insert, update, delete on public.settings to service_role;
+
+drop policy if exists "reward_redemptions_own_read" on public.reward_redemptions;
+create policy "reward_redemptions_own_read" on public.reward_redemptions
+  for select to authenticated using (auth.uid() = user_id);
+revoke insert, update, delete on public.reward_redemptions from anon, authenticated;
+grant select on public.reward_redemptions to authenticated;
+grant select, insert, update, delete on public.reward_redemptions to service_role;
 
 -- ---------------------------------------------------------------------
 -- 4. Triggers

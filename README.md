@@ -42,6 +42,32 @@ node scripts/create-admin.mjs admin@baduma.lk --username baduma-admin
 
 Then sign in at `/admin/login`.
 
+## Verify the hardening
+
+```bash
+npm run build
+BASE_URL=http://localhost:3000 EMPLOYEE_SESSION_SECRET=... npm run verify:security
+```
+
+25 automated checks: anonymous/forged session rejection, token-planting refusal, staff role
+matrix, rate limiting and security headers. Exits non-zero if anything regresses, so it can run in CI.
+
+## What the backend can now do
+
+| Screen | Behaviour |
+|---|---|
+| Storefront `/` | Menu read from `public.products` (fallback: curated list), ISR 60 s |
+| `/admin` | Analytics: products, combos, add-ons, offers, active staff |
+| `/admin/products` | Menu & inventory CRUD + image upload (validated) |
+| `/admin/promotions` | Combos, add-ons, daily offers |
+| `/admin/employees` | Generate Manager/Kitchen/Driver credentials (scrypt, shown once) |
+| `/admin/settings` | Restaurant profile saved to `public.settings`, rendered in the footer |
+| `/employee/login` → `/pos` | Staff sign-in; Managers + Kitchen get the order board |
+| `/employee/login` → `/driver` | Drivers get the delivery screen |
+
+The cart, checkout, `/admin/orders` and `/track-orders` screens are still placeholders — the orders
+pipeline is the remaining product work (see the roadmap in `docs/security-audit.md`).
+
 ## Documentation
 
 - [`docs/backend-auth-setup.md`](./docs/backend-auth-setup.md) — Supabase configuration, credential
@@ -57,4 +83,6 @@ npm run dev        # development server
 npm run build      # production build
 npm run start      # production server
 npm run typecheck  # tsc --noEmit
+npm run verify:security   # security smoke test against BASE_URL
+npm run create:admin      # provision/reset the Master Admin login
 ```

@@ -1,6 +1,7 @@
 import '../globals.css';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getSettings } from '@/lib/settings';
 
 export const metadata = {
   title: 'බැදුම | Digital Menu',
@@ -51,7 +52,15 @@ const NeumorphicLink = ({ href, children }: { href: string; children: React.Reac
   </Link>
 );
 
-export default function CustomerLayout({ children }: { children: React.ReactNode }) {
+export const revalidate = 60;
+
+export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
+  // Contact details are editable by the Master Admin (Admin → Settings).
+  const settings = await getSettings();
+  const telHref = `tel:${settings.phone.replace(/[^+\d]/g, '')}`;
+  const waHref = `https://wa.me/${settings.whatsapp.replace(/[^\d]/g, '')}`;
+  const mailHref = `mailto:${settings.email}`;
+
   return (
     <html lang="en">
       <body className="bg-[#121212] text-gray-200 font-sans min-h-screen flex flex-col selection:bg-[#FFD700] selection:text-[#121212]">
@@ -96,13 +105,13 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <a href="https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr" target="_blank" rel="noreferrer" aria-label="Instagram" className="p-1.5 text-gray-300 hover:text-[#FFD700] hover:scale-110 transition-all duration-300">
               <InstagramIcon />
             </a>
-            <a href="https://wa.me/94770701682" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="p-1.5 text-gray-300 hover:text-[#FFD700] hover:scale-110 transition-all duration-300">
+            <a href={waHref} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="p-1.5 text-gray-300 hover:text-[#FFD700] hover:scale-110 transition-all duration-300">
               <WhatsAppIcon />
             </a>
             <a href="https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic" target="_blank" rel="noreferrer" aria-label="Google Maps location" className="p-1.5 text-gray-300 hover:text-[#FFD700] hover:scale-110 transition-all duration-300">
               <MapPinIcon />
             </a>
-            <a href="tel:+94770701682" aria-label="Call +94 77 070 1682" className="p-1.5 text-gray-300 hover:text-[#FFD700] hover:scale-110 transition-all duration-300">
+            <a href={telHref} aria-label={`Call ${settings.phone}`} className="p-1.5 text-gray-300 hover:text-[#FFD700] hover:scale-110 transition-all duration-300">
               <PhoneIcon />
             </a>
           </div>
@@ -123,15 +132,26 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 <Image src="/images/logo-nav.png" alt="බැදුම" fill sizes="128px" className="object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
               </div>
               <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
-              <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>
+              <p className="text-sm text-gray-400 mt-2">{settings.address}</p>
             </div>
 
             {/* Contact Details */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
               <h3 className="text-[#FFD700] text-xl font-bold mb-4 tracking-wide">Contact Us</h3>
-              <p className="text-sm text-gray-300 mb-3 flex items-center gap-2"><span>📞</span> +94 77 070 1682</p>
-              <p className="text-sm text-gray-300 mb-3 flex items-center gap-2"><span>💬</span> +94 77 948 1682 (WhatsApp)</p>
-              <p className="text-sm text-gray-300 mt-4 flex items-center gap-2"><span>✉️</span> Sadunchamila405@gmail.com</p>
+              <p className="text-sm text-gray-300 mb-3 flex items-center gap-2">
+                <span>📞</span>
+                <a href={telHref} className="hover:text-[#FFD700] transition-all">{settings.phone}</a>
+              </p>
+              <p className="text-sm text-gray-300 mb-3 flex items-center gap-2">
+                <span>💬</span>
+                <a href={waHref} target="_blank" rel="noreferrer" className="hover:text-[#FFD700] transition-all">
+                  {settings.whatsapp} (WhatsApp)
+                </a>
+              </p>
+              <p className="text-sm text-gray-300 mt-4 flex items-center gap-2">
+                <span>✉️</span>
+                <a href={mailHref} className="hover:text-[#FFD700] transition-all break-all">{settings.email}</a>
+              </p>
             </div>
 
             {/* Social & Maps Links */}

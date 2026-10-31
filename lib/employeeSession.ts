@@ -13,10 +13,16 @@ export const EMPLOYEE_LOGIN_PATH = "/employee/login";
 
 export const EMPLOYEE_SECRET_ENV = "EMPLOYEE_SESSION_SECRET";
 
-/** Landing page for each staff role. Mirrored by `/api/employee/login`. */
+/**
+ * Landing page for each staff role. Mirrored by `/api/employee/login`.
+ *
+ * Kitchen staff land on the POS board, which is where incoming orders appear —
+ * they used to be sent to the public storefront (`/`), i.e. straight out of the
+ * protected area.
+ */
 export const ROLE_HOME: Record<string, string> = {
   Manager: "/pos",
-  Kitchen: "/",
+  Kitchen: "/pos",
   Driver: "/driver",
 };
 
@@ -57,16 +63,25 @@ export async function verifyEmployeeToken(
   return payload;
 }
 
-/** Which route prefixes may a given staff role open? */
+/**
+ * Which route prefixes may a given staff role open?
+ *
+ *   /pos      Manager (full/orders) and Kitchen (orders/full) — the order board
+ *   /driver   Driver, or Manager (dispatch)
+ *   /employee any signed-in staff member
+ */
 export function canAccessPath(token: EmployeeToken, pathname: string): boolean {
-  const isManager = token.position === "Manager";
+  const position = token.position;
   const permission = token.permission_level;
+  const hasOrderRights = permission === "full" || permission === "orders";
 
   if (pathname.startsWith("/pos")) {
-    return isManager && (permission === "full" || permission === "orders");
+    if (position === "Manager") return hasOrderRights;
+    if (position === "Kitchen") return hasOrderRights;
+    return false;
   }
   if (pathname.startsWith("/driver")) {
-    return isManager || token.position === "Driver";
+    return position === "Manager" || position === "Driver";
   }
   if (pathname.startsWith("/employee")) {
     return true;

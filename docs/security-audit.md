@@ -339,15 +339,41 @@ putting an admin key in a file that also holds `NEXT_PUBLIC_*` values.
 
 ---
 
+### 🟠 H9 — Admin and customer sessions shared one browser storage slot
+
+Both portals used the same client (`lib/supabaseClient`) and therefore the same
+localStorage session key. Consequences on a shared device:
+
+- a customer OTP login **replaced** the stored admin session, so the dashboard's
+  RLS queries then ran as that customer and silently returned nothing (the
+  httpOnly admin cookie was still valid — a confusing, half-authenticated state);
+- an admin sign-in on the shop tablet logged the shop assistant out.
+
+**Fix:** `lib/supabaseAdminClient.ts` — a second browser client with
+`storageKey: "baduma.admin.auth"`, used only by the admin pages. Authorisation is
+still decided server-side; this only separates the stored JWTs.
+
+### 🟠 H10 — Kitchen staff were redirected to the public storefront
+
+`ROLE_HOME.Kitchen = "/"` and `canAccessPath()` denied `/pos` to non-Managers, so
+kitchen accounts — created for exactly that purpose — could not open the order
+board they were signed in for.
+
+**Fix:** Kitchen lands on `/pos` and may open it with `orders`/`full` permission;
+Managers with `viewer` are still denied; drivers remain barred from `/pos`.
+
 ### ⚪ L1 — Remaining functional bugs (not security)
 
 | File | Bug |
 |---|---|
-| `app/(customer)/page.tsx`, `lib/products.ts`, `components/ProductMenu.tsx` | Storefront menu is **hard-coded**. Admin "Menu & Inventory" writes to `public.products`/`combos`, so price/availability edits never reach customers. |
-| `app/(customer)/loyalty/page.tsx` | Uses `const POINTS = 1250` instead of the signed-in profile → reward claims are pure UI. |
+| ~~storefront menu hard-coded~~ | **FIXED** — `lib/menu.ts` reads active `public.products` rows (ISR 60 s) with the curated static list as fallback; product detail pages accept database uuids as well as static ids. |
+| ~~loyalty page hard-coded 1250 pts~~ | **FIXED** — reads the signed-in profile, redeems through the `redeem_loyalty_reward()` RPC (server-side price list, atomic debit, redemptions ledger). |
+| ~~Settings page saved nothing~~ | **FIXED** — `public.settings` + `/api/admin/settings` (service-role write, allowlisted keys); storefront footer now renders the saved phone/WhatsApp/email/address. |
+| ~~`/admin/settings` missing from nav~~ | **FIXED** — added to the sidebar. |
 | `app/(customer)/cart`, `track-orders` | `PlaceholderPage` — no cart/checkout pipeline exists yet, although copy promises ordering. |
 | `app/(admin)/(dashboard)/admin/products/page.tsx` | `insert([row])` uses the array form while other calls use objects (inconsistent, harmless). |
-| `app/(admin)/(dashboard)/admin/promotions/page.tsx` | Mutates the `comboForm` state object (`comboForm.id = data.id`) before inserting `combo_addons`; can insert `combo_id: undefined` on fast re-submits. |
+| ~~promotions mutation bug~~ | **FIXED** — `saveCombo` captured the new id in a local variable instead of mutating state (previously could insert `combo_id: undefined`). |
+| `app/(customer)/cart`, `/track-orders`, `/pos`, `/driver`, `/admin/orders` | Still presentational (no cart state, no orders/checkout pipeline, no live order feed). This is unfinished product scope, not a security defect — see roadmap item 5. |
 | `app/driver/page.tsx` | Hard-coded order/customer data (now behind staff auth, but still not wired to the DB). |
 | repo-wide | No tests, no ESLint config, `next-env.d.ts` git-ignored (first `tsc --noEmit` fails on CSS imports until a build runs). |
 
@@ -385,6 +411,18 @@ lib/employeeAuth.ts              rewritten — scrypt hashing, dummy hash, crede
 lib/supabaseServer.ts            NEW — service-role + anon server clients (server-only guard)
 lib/rateLimit.ts                 NEW — fixed-window limiter for auth endpoints
 lib/supabaseClient.ts            hardened — PKCE session, service-role key guard
+lib/supabaseAdminClient.ts       NEW — separate storage key for admin sessions
+lib/menu.ts                      NEW — DB-backed storefront menu (+ static fallback)
+lib/settings.ts                  NEW — restaurant profile read/merge
+components/CustomerMenuGrid.tsx  NEW — storefront menu grid (client filter)
+app/(customer)/page.tsx          rewritten — server component reading the live menu
+app/(customer)/product/[id]/page.tsx  rewritten — static ids + database uuids
+app/(customer)/layout.tsx        footer renders saved settings (revalidate 60s)
+app/(customer)/loyalty/page.tsx  real points + redeem_loyalty_reward RPC
+app/(admin)/.../settings/page.tsx  persists to /api/admin/settings
+app/api/admin/settings/route.ts  NEW — GET/PATCH restaurant settings (admin only)
+scripts/verify-security.mjs      NEW — 25-check security smoke test (npm run verify:security)
+types/assets.d.ts                NEW — typecheck works before the first build
 middleware.ts                    rewritten — verifies admin & staff sessions, protects /pos /driver /employee
 app/api/admin/login/route.ts     NEW — the backend login (username→email, verified role, cookies)
 app/api/admin/session/route.ts   rewritten — GET introspection, DELETE revocation, POST 405
@@ -410,8 +448,9 @@ docs/backend-auth-setup.md       NEW — operator runbook
 ## 6. Verification performed
 
 ```bash
-npx tsc --noEmit      # clean
-npx next build        # 44 routes compiled
+npx tsc --noEmit              # clean (also before the first build, via types/assets.d.ts)
+npx next build                # compiled, 45 routes
+npm run verify:security       # 25/25 checks passed against the production build
 ```
 
 Runtime checks against `next start` (production build):
@@ -432,6 +471,7 @@ Runtime checks against `next start` (production build):
 | Admin login, 5 bad attempts | `401 ×5`, then `429` with `Retry-After` |
 | `DELETE /api/admin/session` | clears both cookies (`HttpOnly; Secure; SameSite=lax`) |
 | Response headers | CSP, HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy |
+| `npm run verify:security` | 25/25 ✅ (anon redirects, forged cookie, token planting, role matrix, rate limit, headers) |
 
 ---
 
@@ -445,10 +485,13 @@ Runtime checks against `next start` (production build):
    cosmetic.
 3. **Distributed rate limiting / WAF** (Upstash, Cloudflare) — the in-memory limiter is
    per-instance.
-4. **Wire the storefront to Postgres** (`public.products`) instead of `lib/products.ts`, otherwise
-   inventory controls are decorative.
-5. **CI**: `npm run typecheck`, `next build`, `supabase db lint`, and a dependency audit
-   (`npm audit`) on every PR. Add `next-env.d.ts` generation before `tsc` in CI.
+4. **Build the ordering pipeline** (the largest remaining gap): `orders`/`order_items` tables with
+   RLS (customer reads own, staff reads assigned), a server-side cart + checkout API that re-prices
+   every line against `public.products` (never trust client prices), POS live-order feed with
+   status transitions, and the driver assignment view. The storefront cart and `/pos`, `/driver`,
+   `/admin/orders` screens are currently placeholders.
+5. **CI**: `npm run typecheck`, `next build`, `npm run verify:security` against a preview deploy,
+   `supabase db lint`, and `npm audit` on every PR.
 6. **Audit logging**: write admin actions (staff creation, deletions, uploads) to an
    `admin_audit_log` table with the verified actor id.
 7. **Turnstile/CAPTCHA** on `signInWithOtp` and admin login; enforce Supabase Auth rate limits

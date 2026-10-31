@@ -2,13 +2,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin as supabase } from '@/lib/supabaseAdminClient';
 
 const STAT_DEFS = [
   { key: 'products', label: 'Active Products', icon: '🍔', table: 'products', activeOnly: true },
   { key: 'combos', label: 'Active Combos', icon: '🎉', table: 'combos', activeOnly: true },
   { key: 'addons', label: 'Cross-selling Add-ons', icon: '🥤', table: 'addons', activeOnly: false },
   { key: 'offers', label: 'Active Daily Offers', icon: '🏷️', table: 'daily_offers', activeOnly: true },
+  { key: 'employees', label: 'Active Staff', icon: '👥', table: 'employees', activeOnly: true },
 ];
 
 type Stats = Record<string, number | null>;
@@ -44,7 +45,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {STAT_DEFS.map((s) => (
           <div
             key={s.key}

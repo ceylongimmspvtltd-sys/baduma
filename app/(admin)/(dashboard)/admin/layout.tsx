@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseAdmin as supabase } from "@/lib/supabaseAdminClient";
 
 const NAV = [
   { href: "/admin", label: "Dashboard (Analytics)", icon: "📊" },
