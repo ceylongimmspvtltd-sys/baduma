@@ -60,7 +60,7 @@ export default function CustomerLayout({
 
             {/* Brand Info */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
-              <h3 className="text-[#FFD700] text-xl font-black mb-2 tracking-wide">Baduma.sl</h3>
+              <h3 className="text-[#FFD700] text-xl font-black mb-2 tracking-wide">බැදුම</h3>
               <p className="text-xs text-[#FFD700]/80 mb-4 font-bold">බැදුම නගරේ රහට * ගානට {/*[cite: 6] */}</p>
               <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
               <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const MENU_ITEMS = [
   // ───────────────────────── Fried Rice (9) ─────────────────────────
@@ -55,12 +56,13 @@ export default function CustomerHomePage() {
         ))}
       </div>
 
-      {/* 3D Neumorphic Product Grid */}
+      {/* 3D Neumorphic Product Grid — cards wrapped in Link */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredItems.map((item, index) => (
-          <div
+          <Link
             key={item.id}
-            className="p-5 rounded-[2rem] bg-[#121212] shadow-[10px_10px_20px_#070707,-10px_-10px_20px_#1d1d1d] border border-[#1d1d1d] flex flex-col group"
+            href={`/product/${item.id}`}
+            className="p-5 rounded-[2rem] bg-[#121212] shadow-[10px_10px_20px_#070707,-10px_-10px_20px_#1d1d1d] border border-[#1d1d1d] flex flex-col group transition-all duration-300 hover:shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d]"
           >
 
             {/* Product Image — inset frame */}
@@ -74,38 +76,38 @@ export default function CustomerHomePage() {
                 priority={index < 3}
               />
               {/* Category Tag — overlapping top-left */}
-              <span className="absolute top-3 left-3 px-3 py-1 text-[10px] font-bold tracking-widest text-[#8FBC8F] bg-[#121212]/90 backdrop-blur-sm rounded-lg shadow-[inset_2px_2px_4px_#070707,inset_-2px_-2px_4px_#1d1d1d]">
+              <span className="absolute top-3 left-3 px-3 py-1 text-[10px] font-bold tracking-widest text-[#121212] bg-[#8FBC8F] rounded-lg shadow-[2px_2px_4px_#070707]">
                 {item.category}
               </span>
             </div>
 
-            {/* Product Name + Description */}
+            {/* Product Name — clean white */}
             <div className="flex-grow">
-              <h3 className="text-lg font-black text-gray-100 mb-2 uppercase tracking-wide">{item.name}</h3>
+              <h3 className="text-lg font-black text-white mb-2 uppercase tracking-wide">{item.name}</h3>
               <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
             </div>
 
-            {/* Price Toggles — Sage Green 3D pressed */}
+            {/* Price Toggles — Green background, Black text, 3D pressed */}
             <div className="flex gap-3 mt-5">
               {item.normalPrice && (
-                <div className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl bg-[#121212] border border-[#8FBC8F]/20 shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]">
-                  <span className="text-[10px] text-gray-400 font-bold tracking-widest">NORMAL</span>
-                  <span className="text-sm font-black text-[#8FBC8F]">Rs. {item.normalPrice}</span>
+                <div className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl bg-[#8FBC8F] shadow-[inset_4px_4px_8px_#5A7A5A,inset_-4px_-4px_8px_#B8D8B8]">
+                  <span className="text-[10px] font-bold tracking-widest text-[#121212]">NORMAL</span>
+                  <span className="text-sm font-black text-[#121212]">Rs. {item.normalPrice}</span>
                 </div>
               )}
               {item.fullPrice && (
-                <div className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl bg-[#121212] border border-[#8FBC8F]/20 shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]">
-                  <span className="text-[10px] text-gray-400 font-bold tracking-widest">FULL</span>
-                  <span className="text-sm font-black text-[#8FBC8F]">Rs. {item.fullPrice}</span>
+                <div className="flex-1 flex flex-col items-center justify-center py-3 rounded-xl bg-[#8FBC8F] shadow-[inset_4px_4px_8px_#5A7A5A,inset_-4px_-4px_8px_#B8D8B8]">
+                  <span className="text-[10px] font-bold tracking-widest text-[#121212]">FULL</span>
+                  <span className="text-sm font-black text-[#121212]">Rs. {item.fullPrice}</span>
                 </div>
               )}
             </div>
 
-            {/* ADD TO CART — Yellow 3D extruded, full width */}
-            <button className="w-full mt-4 py-4 rounded-xl font-black text-[#121212] bg-[#FFD700] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#332b00] active:shadow-[inset_4px_4px_8px_#ccac00,inset_-4px_-4px_8px_#ffea4d] transition-all tracking-wider flex items-center justify-center gap-2">
+            {/* ADD TO CART — Yellow 3D extruded (visual inside Link) */}
+            <div className="w-full mt-4 py-4 rounded-xl font-black text-[#121212] bg-[#FFD700] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#332b00] flex items-center justify-center gap-2">
               <span>🛒</span> ADD TO CART
-            </button>
-          </div>
+            </div>
+          </Link>
         ))}
       </div>
     </div>
