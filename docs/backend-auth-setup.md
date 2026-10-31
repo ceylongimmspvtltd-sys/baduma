@@ -230,6 +230,35 @@ router.replace(safeNextPath(nextUrl)); // local paths only — no open redirect
 
 ---
 
+## 4.5 Fast path: one command → your username + password
+
+Generate a strong password and install the account in one step (run it anywhere
+that can reach your Supabase project — your machine, or `vercel env pull`):
+
+```bash
+export SUPABASE_URL=https://<ref>.supabase.co
+export SUPABASE_SERVICE_ROLE_KEY=<service role key>
+
+PASS=$(node -e '
+const c=require("node:crypto");
+const w=["Kottu","Lava","Gold","Spice","Roti","Ceylon","Pearl","Mango"];
+console.log(w[c.randomInt(w.length)]+w[c.randomInt(w.length)]+["#","@","!","$"][c.randomInt(4)]+
+  c.randomInt(1000,9999)+c.randomBytes(3).toString("hex").toUpperCase());
+')
+
+node scripts/create-admin.mjs owner@baduma.lk --username baduma-owner --password "$PASS"
+echo "LOGIN: /admin/login  ·  baduma-owner  ·  $PASS"
+```
+
+Re-running the same command **resets the password** (it takes the "UPDATED" path),
+so it doubles as a recovery tool. Add `--json` for CI/automation.
+
+> `scripts/create-admin.mjs` needs the **service role key**. The anon key cannot
+> create users or write `app_metadata` — that asymmetry is exactly why the admin
+> role lives in `app_metadata`.
+
+---
+
 ## 5. Verify the whole flow
 
 ```bash
@@ -254,6 +283,53 @@ npm start                    # or: next dev
 6. Customers: `/login` still sends an OTP and never mentions a password.
 
 ---
+
+## 5.1 End-to-end proof without a Supabase project
+
+The auth path was verified end-to-end against a local GoTrue/PostgREST emulator,
+so you can reproduce the whole thing offline (no keys, no network):
+
+```bash
+# terminal 1 — local emulator (:54321)
+npm run dev:mock
+
+# terminal 2 — build + run the app against it
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 \
+NEXT_PUBLIC_SUPABASE_ANON_KEY=mock-anon-key \
+SUPABASE_SERVICE_ROLE_KEY=mock-service-key \
+EMPLOYEE_SESSION_SECRET=$(openssl rand -base64 48) \
+npx next build && npx next start -p 3112
+
+# terminal 3 — the checks
+BASE_URL=http://127.0.0.1:3112 \
+ADMIN_IDENTIFIER=baduma-admin ADMIN_EMAIL=admin@baduma.lk ADMIN_PASSWORD='AdminDemo#2026' \
+STAFF_USERNAME=mgr-demo STAFF_PASSWORD='StaffDemo#2026' \
+npm run test:e2e
+
+BASE_URL=http://127.0.0.1:3112 \
+EMPLOYEE_SESSION_SECRET=<the same secret> npm run verify:security
+```
+
+Verified output (2026-10-31):
+
+```
+✅ wrong admin password is rejected — HTTP 401
+✅ admin login with username "baduma-admin" — HTTP 200
+✅ login sets an httpOnly admin cookie
+✅ authenticated /admin dashboard renders — HTTP 200
+✅ GET /api/admin/employees with session — HTTP 200
+✅ PATCH /api/admin/settings persists — HTTP 200
+✅ sign-out clears the session — HTTP 200
+✅ signed-out cookie can no longer open /admin — HTTP 307
+✅ admin login with email "admin@baduma.lk" — HTTP 200
+✅ staff login "mgr-demo" — HTTP 200
+✅ staff session opens /pos (Manager) — HTTP 200
+✅ storefront is public / customer OTP login is public
+🎉 end-to-end auth flow works — 17/17
+```
+
+The emulator is a **test double only** (`scripts/dev-supabase-mock.mjs`). It is
+not secure and must never be deployed.
 
 ## 6. Troubleshooting
 

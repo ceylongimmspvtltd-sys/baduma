@@ -160,10 +160,30 @@ async function restApi(method, path, body, prefer) {
   return { status: res.status, json, text };
 }
 
+/**
+ * Look up an existing user by email.
+ *
+ * GoTrue's admin list endpoint is PAGINATED — it answers
+ * `{ users: [...], next_page, total }` and ignores an arbitrary `email` filter,
+ * so the old `GET /admin/users?email=…` + `.find()` never matched on a real
+ * project and re-running this script failed instead of resetting the password.
+ */
 async function findUserByEmail(target) {
-  const res = await authApi("GET", `/admin/users?email=${encodeURIComponent(target)}`);
-  if (res.status !== 200 || !Array.isArray(res.json)) return null;
-  return res.json.find((u) => u.email?.toLowerCase() === target) ?? null;
+  const perPage = 200;
+  for (let page = 1; page <= 50; page += 1) {
+    const res = await authApi("GET", `/admin/users?page=${page}&per_page=${perPage}`);
+    if (res.status !== 200) return null;
+
+    const list = Array.isArray(res.json) ? res.json : res.json?.users;
+    if (!Array.isArray(list)) return null;
+
+    const match = list.find((u) => u.email?.toLowerCase() === target);
+    if (match) return match;
+
+    const hasNext = Array.isArray(res.json) ? list.length === perPage : Boolean(res.json?.next_page);
+    if (!hasNext || list.length === 0) return null;
+  }
+  return null;
 }
 
 /* ------------------------------------------------------------------ */
