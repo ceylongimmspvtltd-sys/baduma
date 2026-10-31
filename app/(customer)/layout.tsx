@@ -55,8 +55,8 @@ export default function CustomerLayout({
           </div>
         </nav>
 
-        {/* ── Hero Banner ────────────────────────────────────────── */}
-        <section className="relative w-full h-[400px] md:h-[460px] mx-3 mb-6 rounded-[2rem] overflow-hidden shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d]">
+        {/* ── Hero Banner (4:3 landscape cover) ────────────────────────────── */}
+        <section className="relative w-full aspect-[4/3] mx-3 mb-6 rounded-[2rem] overflow-hidden shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d]">
           <Image
             src="/images/hero-restaurant.jpg"
             alt="Baduma food cart at Pilimatalawa, Kandy"
@@ -75,34 +75,80 @@ export default function CustomerLayout({
               <Image src={heroLogo.src} alt="Baduma" width={59} height={48} className="h-12 w-auto" />
             </div>
 
-            {/* Contact & Social Buttons — inside the hero */}
-            <div className="flex flex-wrap gap-3 max-w-lg">
-              {[
-                {
-                  icon: '📘',
-                  label: 'Facebook',
-                  href: 'https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr',
-                },
-                {
-                  icon: '📸',
-                  label: 'Instagram',
-                  href: 'https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr',
-                },
-                { icon: '💬', label: 'WhatsApp', href: 'https://wa.me/94779481682' },
-                { icon: '📍', label: 'Maps', href: 'https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic' },
-                { icon: '📞', label: 'Call', href: 'tel:+94770701682' },
-              ].map((btn) => (
-                <a
-                  key={btn.label}
-                  href={btn.href}
-                  target={btn.href.startsWith('tel:') ? undefined : '_blank'}
-                  rel="noreferrer"
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl font-black text-[#121212] bg-[#D4AF37] shadow-[4px_4px_10px_#070707,-4px_-4px_10px_#8a6d1a] active:shadow-[inset_3px_3px_6px_#8a6d1a,inset_-3px_-3px_6px_#ffea4d] transition-all hover:brightness-110 text-sm tracking-wide"
-                >
-                  <span className="text-lg">{btn.icon}</span>
-                  {btn.label}
-                </a>
-              ))}
+            {/* Bottom row — tagline + promotional badge + minimal brand icons */}
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-5">
+              <div className="max-w-xs">
+                <p className="text-lg md:text-xl font-black text-white leading-snug">
+                  Hot Hot.....,Taste the Flavors, and Delivered Fast to Your Doorstep!
+                </p>
+                <span className="inline-block mt-3 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full bg-[#D4AF37] text-[#121212] shadow-[0_0_14px_rgba(212,175,55,0.5)]">
+                  We deliver right to your doorstep.
+                </span>
+              </div>
+
+              {/* Minimal floating brand icons — raw icons only, no labels/backgrounds */}
+              <div className="flex items-center gap-3">
+                {[
+                  {
+                    label: 'Facebook',
+                    href: 'https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr',
+                    icon: (
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17" aria-hidden="true">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'Instagram',
+                    href: 'https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr',
+                    icon: (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" aria-hidden="true">
+                        <rect x="2" y="2" width="20" height="20" rx="5" />
+                        <circle cx="12" cy="12" r="4" />
+                        <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'WhatsApp',
+                    href: 'https://wa.me/94779481682',
+                    icon: (
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17" aria-hidden="true">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.26-.473-2.406-1.475-.803-.589-1.488-.932-2.184-1.138-.676-.2-1.349-.197-1.923.1-.575.297-1.107.869-1.437 1.275-.331.399-.63 1.022-.686 1.202-.061.184-.237.291-.438.15-.199-.148-.82-.635-1.122-.898-.301-.262-.5-.301-.702.075-.201.375-.807.937-1.232.294-.665.571-.833.71-.948.139-.115.218-.187.312-.301.079-.089.139-.173.139-.291 0-.118-.04-.173-.119-.291-.079-.118-1.13-2.703-1.54-3.697-.401-.967-.793-.553-1.074-.401-.575.294-.775.598-.936.901-.162.301-.291.645-.217.758.073.115.218.372.702 1.229.393.675.799 1.44 1.055 2.12.237.624.395 1.14.524 1.675.128.535.128 1.074.099 1.202-.031.13-.159.303-.159.462 0 .16.061.297.237.438.176.142.393.331 1.164.876.741.527 1.375 1.015 1.717 1.466.394.433.71.82.845.993.294.331.175.654-.023 1.036-.199.376-.414.698-.888 1.128-.528.495-1.055.876-1.578 1.229-.598.331-.461.5-.659.658-.199.159-.414.237-.702.16-.294-.079-1.015-.376-1.512-.635-.528-.257-1.055-.395-1.54-.563z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'Google Maps',
+                    href: 'https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic',
+                    icon: (
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17" aria-hidden="true">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'Call',
+                    href: 'tel:+94770701682',
+                    icon: (
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17" aria-hidden="true">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                      </svg>
+                    ),
+                  },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target={item.href.startsWith('tel:') ? undefined : '_blank'}
+                    rel="noreferrer"
+                    aria-label={item.label}
+                    className="flex items-center justify-center w-11 h-11 rounded-full bg-[#121212]/70 backdrop-blur-md shadow-[3px_3px_8px_#070707,inset_0_0_0_1px_rgba(255,255,255,0.08)] text-white hover:text-[#D4AF37] hover:shadow-[0_0_14px_rgba(212,175,55,0.5),inset_0_0_0_1px_rgba(212,175,55,0.4)] transition-all duration-300"
+                  >
+                    {item.icon}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </section>
