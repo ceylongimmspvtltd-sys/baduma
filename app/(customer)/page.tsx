@@ -47,8 +47,8 @@ export default function CustomerHomePage() {
             onClick={() => setActiveCategory(cat)}
             className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
               activeCategory === cat
-                ? 'bg-[#121212] text-[#FFD700] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]'
-                : 'bg-[#121212] text-gray-400 shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] hover:text-[#FFD700]'
+                ? 'bg-[#121212] text-[#D4AF37] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]'
+                : 'bg-[#121212] text-gray-400 shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] hover:text-[#D4AF37]'
             }`}
           >
             {cat}
@@ -62,11 +62,11 @@ export default function CustomerHomePage() {
           <Link
             key={item.id}
             href={`/product/${item.id}`}
-            className="p-5 rounded-[2rem] bg-[#121212] shadow-[10px_10px_20px_#070707,-10px_-10px_20px_#1d1d1d] border border-[#1d1d1d] flex flex-col group transition-all duration-300 hover:shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d]"
+            className="p-5 rounded-[2rem] bg-[#121212] shadow-[10px_10px_20px_#070707,-10px_-10px_20px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d] flex flex-col group transition-all duration-300 hover:shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d]"
           >
 
-            {/* Product Image — inset frame */}
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] mb-5">
+            {/* Product Image — deep inset frame */}
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[inset_8px_8px_16px_#070707,inset_-8px_-8px_16px_#1d1d1d] mb-5">
               <Image
                 src={item.image}
                 alt={item.name}
@@ -75,7 +75,7 @@ export default function CustomerHomePage() {
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                 priority={index < 3}
               />
-              {/* Category Tag — overlapping top-left */}
+              {/* Category Tag — green bg, black text */}
               <span className="absolute top-3 left-3 px-3 py-1 text-[10px] font-bold tracking-widest text-[#121212] bg-[#8FBC8F] rounded-lg shadow-[2px_2px_4px_#070707]">
                 {item.category}
               </span>
@@ -103,8 +103,8 @@ export default function CustomerHomePage() {
               )}
             </div>
 
-            {/* ADD TO CART — Yellow 3D extruded (visual inside Link) */}
-            <div className="w-full mt-4 py-4 rounded-xl font-black text-[#121212] bg-[#FFD700] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#332b00] flex items-center justify-center gap-2">
+            {/* ADD TO CART — Premium Gold 3D extruded */}
+            <div className="w-full mt-4 py-4 rounded-xl font-black text-[#121212] bg-[#D4AF37] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#8a6d1a] flex items-center justify-center gap-2">
               <span>🛒</span> ADD TO CART
             </div>
           </Link>
