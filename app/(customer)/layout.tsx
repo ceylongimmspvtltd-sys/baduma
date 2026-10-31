@@ -70,16 +70,20 @@ export default function CustomerLayout({
           <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-[#121212]/40" />
 
           <div className="relative z-10 h-full p-6 md:p-10 flex flex-col justify-between">
-            {/* Official Logo — left side */}
-            <div className="inline-flex items-center gap-3 p-2 rounded-2xl bg-[#121212]/80 backdrop-blur-md shadow-[4px_4px_10px_#070707,inset_0_0_0_1px_rgba(212,175,55,0.25)] self-start">
+            {/* Official Logo + Tagline — left side */}
+            <div className="inline-flex items-center gap-4 p-3 pr-5 rounded-2xl bg-[#121212]/80 backdrop-blur-md shadow-[4px_4px_10px_#070707,inset_0_0_0_1px_rgba(212,175,55,0.25)] self-start">
               <Image src={heroLogo.src} alt="Baduma" width={59} height={48} className="h-12 w-auto" />
+              <span className="text-[11px] font-bold tracking-widest text-[#D4AF37]/90 whitespace-nowrap">නගරේ රහට * ගානට</span>
             </div>
 
             {/* Bottom row — tagline + promotional badge + minimal brand icons */}
             <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-5">
               <div className="max-w-xs">
                 <p className="text-lg md:text-xl font-black text-white leading-snug">
-                  Hot Hot.....,Taste the Flavors, and Delivered Fast to Your Doorstep!
+                  <span className="text-red-500">Hot</span>{' '}
+                  <span className="text-[#FFD700]">Taste the Flavors</span>{' '}
+                  and Delivered <span className="text-green-500">Fast</span> to Your{' '}
+                  <span className="text-blue-400">Doorstep</span>
                 </p>
                 <span className="inline-block mt-3 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full bg-[#D4AF37] text-[#121212] shadow-[0_0_14px_rgba(212,175,55,0.5)]">
                   We deliver right to your doorstep.
