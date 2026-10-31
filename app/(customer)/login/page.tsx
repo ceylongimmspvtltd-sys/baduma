@@ -58,12 +58,13 @@ export default function CustomerOTPLogin() {
       <div className="w-full max-w-md p-10 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d]">
 
         <div className="text-center mb-10">
+          <img src="/images/logo-nav.png" alt="බැදුම" className="h-16 w-auto mx-auto mb-4 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
           <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-            {step === 'request' ? 'Sign In' : 'Verify'}
+            බැදුම
           </h2>
           <p className="text-sm text-gray-400 font-bold">
             {step === 'request'
-              ? 'Enter Phone Number or Email'
+              ? 'Sign In or Create Account — No Password'
               : `Secure code sent to ${identifier}`}
           </p>
         </div>
@@ -78,6 +79,9 @@ export default function CustomerOTPLogin() {
               className="w-full px-6 py-5 rounded-2xl bg-[#121212] text-white outline-none shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] focus:shadow-[inset_8px_8px_16px_#070707,inset_-8px_-8px_16px_#1d1d1d] transition-all text-sm font-bold tracking-wider"
               required
             />
+            <p className="text-[11px] text-gray-500 text-center -mt-2">
+              New here? Just enter your number — we will create your account automatically. WhatsApp/Phone OTP.
+            </p>
             {errorMsg && <p className="text-red-500 text-xs text-center font-bold bg-[#121212] p-2 rounded-lg shadow-[inset_2px_2px_4px_#070707]">{errorMsg}</p>}
             <button disabled={loading} className={GOLD_BTN}>
               {loading ? 'Sending OTP...' : 'Send Secure OTP'}
