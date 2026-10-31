@@ -31,11 +31,11 @@ export default function ProductMenu() {
     <div className="w-full py-6">
       {/* Brand Header Banner */}
       <div className="mb-10 text-center p-8 rounded-3xl bg-[#121212] shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] border border-[#1d1d1d]">
-        <span className="text-[#FFD700] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d]">
+        <span className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d]">
           බැදුම නගරේ රහට * ගානට
         </span>
         <h1 className="text-4xl font-black text-white mt-4 mb-2 tracking-wide">
-          Baduma.sl Digital Menu
+          බැදුම Digital Menu
         </h1>
         <p className="text-sm text-gray-400">
           Freshly cooked from Malgammana, Kandy. Order your favorites instantly.
@@ -53,7 +53,7 @@ export default function ProductMenu() {
               className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 whitespace-nowrap ${
                 isActive
                   ? 'bg-[#121212] text-[#8FBC8F] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] border border-[#8FBC8F]/30'
-                  : 'bg-[#121212] text-gray-300 shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] hover:text-[#FFD700]'
+                  : 'bg-[#121212] text-gray-300 shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] hover:text-[#D4AF37]'
               }`}
             >
               {cat}
@@ -94,7 +94,7 @@ export default function ProductMenu() {
                       Plate Preview
                     </div>
                   )}
-                  <span className="absolute top-3 left-3 text-[10px] font-bold px-3 py-1 rounded-full bg-[#121212]/90 text-[#FFD700] shadow-[2px_2px_4px_#070707]">
+                  <span className="absolute top-3 left-3 text-[10px] font-bold px-3 py-1 rounded-full bg-[#121212]/90 text-[#D4AF37] shadow-[2px_2px_4px_#070707]">
                     {product.category}
                   </span>
                 </Link>
@@ -102,7 +102,7 @@ export default function ProductMenu() {
                 {/* Product Name — clickable to detail page */}
                 <Link
                   href={`/product/${product.id}`}
-                  className="block text-xl font-bold text-gray-100 mb-4 tracking-wide hover:text-[#FFD700] transition-colors"
+                  className="block text-xl font-bold text-gray-100 mb-4 tracking-wide hover:text-[#D4AF37] transition-colors"
                 >
                   {product.name}
                 </Link>
@@ -164,7 +164,7 @@ export default function ProductMenu() {
 
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className="flex-1 py-3 px-4 rounded-xl font-bold text-[#121212] bg-[#FFD700] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#332b00] active:shadow-[inset_3px_3px_6px_#ccac00,inset_-3px_-3px_6px_#ffea4d] transition-all text-sm tracking-wide"
+                  className="flex-1 py-3 px-4 rounded-xl font-bold text-[#121212] bg-[#D4AF37] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#332b00] active:shadow-[inset_3px_3px_6px_#ccac00,inset_-3px_-3px_6px_#ffea4d] transition-all text-sm tracking-wide"
                 >
                   Add to Cart
                 </button>

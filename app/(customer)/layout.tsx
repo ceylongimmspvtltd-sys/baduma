@@ -1,5 +1,6 @@
 import '../globals.css';
 import Link from 'next/link';
+import MobileSidebarDrawer from '@/components/MobileSidebarDrawer';
 
 export const metadata = {
   title: 'බැදුම | Digital Menu',
@@ -29,8 +30,8 @@ export default function CustomerLayout({
               </span>
             </Link>
 
-            {/* Allowed Customer Links Only */}
-            <div className="flex items-center gap-4 sm:gap-6">
+            {/* Allowed Customer Links Only (desktop) */}
+            <div className="hidden md:flex items-center gap-4 sm:gap-6">
               {[
                 { name: 'Menu', href: '/' },
                 { name: 'Cart', href: '/cart' },
@@ -46,6 +47,9 @@ export default function CustomerLayout({
                 </Link>
               ))}
             </div>
+
+            {/* Mobile Hamburger + Sidebar Drawer */}
+            <MobileSidebarDrawer />
           </div>
         </nav>
 

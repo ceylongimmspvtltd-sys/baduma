@@ -50,12 +50,15 @@ export default function CustomerOTPLogin() {
     }
   };
 
+  const GOLD_BTN =
+    'mt-2 w-full py-5 rounded-2xl font-black text-[#121212] bg-[#D4AF37] shadow-[6px_6px_14px_#070707,-6px_-6px_14px_#8a6d1a] active:shadow-[inset_5px_5px_10px_#8a6d1a,inset_-5px_-5px_10px_#ffea4d] transition-all disabled:opacity-50 tracking-wider';
+
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md p-10 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d]">
+      <div className="w-full max-w-md p-10 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d]">
 
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-md">
+          <h2 className="text-3xl font-black text-[#D4AF37] mb-2 tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
             {step === 'request' ? 'Sign In' : 'Verify'}
           </h2>
           <p className="text-sm text-gray-400 font-bold">
@@ -76,7 +79,7 @@ export default function CustomerOTPLogin() {
               required
             />
             {errorMsg && <p className="text-red-500 text-xs text-center font-bold bg-[#121212] p-2 rounded-lg shadow-[inset_2px_2px_4px_#070707]">{errorMsg}</p>}
-            <button disabled={loading} className="mt-2 w-full py-5 rounded-2xl font-black text-[#121212] bg-[#FFD700] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#332b00] active:shadow-[inset_4px_4px_8px_#ccac00,inset_-4px_-4px_8px_#ffea4d] transition-all disabled:opacity-50 tracking-wider">
+            <button disabled={loading} className={GOLD_BTN}>
               {loading ? 'Sending OTP...' : 'Send Secure OTP'}
             </button>
           </form>
@@ -87,15 +90,15 @@ export default function CustomerOTPLogin() {
               placeholder="000000"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              className="w-full px-6 py-5 rounded-2xl bg-[#121212] text-[#FFD700] text-center tracking-[1em] font-mono text-2xl outline-none shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] transition-all"
+              className="w-full px-6 py-5 rounded-2xl bg-[#121212] text-[#D4AF37] text-center tracking-[1em] font-mono text-2xl outline-none shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] transition-all"
               maxLength={6}
               required
             />
             {errorMsg && <p className="text-red-500 text-xs text-center font-bold bg-[#121212] p-2 rounded-lg shadow-[inset_2px_2px_4px_#070707]">{errorMsg}</p>}
-            <button disabled={loading} className="mt-2 w-full py-5 rounded-2xl font-black text-[#121212] bg-[#FFD700] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#332b00] active:shadow-[inset_4px_4px_8px_#ccac00,inset_-4px_-4px_8px_#ffea4d] transition-all disabled:opacity-50 tracking-wider">
+            <button disabled={loading} className={GOLD_BTN}>
               {loading ? 'Verifying...' : 'Verify & Enter Profile'}
             </button>
-            <button type="button" onClick={() => setStep('request')} className="text-xs text-gray-500 hover:text-[#FFD700] text-center mt-2 font-bold transition-all">
+            <button type="button" onClick={() => setStep('request')} className="text-xs text-gray-500 hover:text-[#D4AF37] text-center mt-2 font-bold transition-all">
               ← Change Phone/Email
             </button>
           </form>
