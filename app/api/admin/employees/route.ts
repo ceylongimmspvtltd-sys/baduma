@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   const envError = requireSupabaseEnv();
   if (envError) return envError;
 
-  const { position, permission_level } = await req.json().catch(() => ({}));
+  const { position, permission_level, full_name, contact } = await req.json().catch(() => ({}));
   if (!POSITIONS.includes(position)) {
     return NextResponse.json({ error: 'Invalid job position.' }, { status: 400 });
   }
@@ -55,12 +55,14 @@ export async function POST(req: NextRequest) {
     .insert({
       username,
       password_hash: hashPassword(password),
+      full_name: typeof full_name === 'string' ? full_name.trim() : null,
+      contact: typeof contact === 'string' ? contact.trim() : null,
       position,
       permission_level,
       is_active: true,
       created_by: adminSub,
     })
-    .select('id, username, position, permission_level')
+    .select('id, username, full_name, contact, position, permission_level')
     .single();
 
   if (error) {
