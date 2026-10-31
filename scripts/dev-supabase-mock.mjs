@@ -97,6 +97,18 @@ const db = {
   ],
   employees: [
     {
+      id: "44444444-4444-4444-4444-444444444444",
+      username: "drv-demo",
+      password_hash: hashPassword(process.env.MOCK_DRIVER_PASSWORD ?? "DriverDemo#2026"),
+      full_name: "Saman Kumara",
+      contact: "+94 77 555 0000",
+      position: "Driver",
+      permission_level: "delivery",
+      is_active: true,
+      created_by: null,
+      created_at: new Date().toISOString(),
+    },
+    {
       id: "22222222-2222-2222-2222-222222222222",
       username: STAFF_USERNAME,
       password_hash: hashPassword(STAFF_PASSWORD),
@@ -109,6 +121,34 @@ const db = {
       created_at: new Date().toISOString(),
     },
   ],
+  products: [
+    {
+      id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      name: "Chicken Kottu",
+      description: "The iconic kottu rotti shredded and fried with chicken.",
+      category: "Kottu",
+      veg: false,
+      image_url: "/images/kottu-chicken.jpg",
+      normal_price: 700,
+      full_price: 950,
+      is_active: true,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      name: "Vegetables Fried Rice",
+      description: "Wok-tossed fried rice loaded with fresh garden vegetables.",
+      category: "Fried Rice",
+      veg: true,
+      image_url: "/images/fried-rice-veg.jpg",
+      normal_price: 500,
+      full_price: 750,
+      is_active: true,
+      created_at: new Date().toISOString(),
+    },
+  ],
+  orders: [],
+  order_items: [],
   settings: [
     { key: "restaurant_name", value: "බැදුම", updated_at: new Date().toISOString() },
     { key: "phone", value: "+94 77 070 1682", updated_at: new Date().toISOString() },
@@ -152,6 +192,18 @@ function publicUser(user) {
 /* PostgREST-ish layer                                                 */
 /* ------------------------------------------------------------------ */
 
+function parseOrFilter(url) {
+  const raw = url.searchParams.get("or");
+  if (!raw) return null;
+  return raw
+    .replace(/^\(|\)$/g, "")
+    .split(",")
+    .map((clause) => {
+      const [column, op, ...rest] = clause.split(".");
+      return { column, op, value: rest.join(".") };
+    });
+}
+
 function parseFilters(url) {
   const filters = [];
   const select = url.searchParams.get("select");
@@ -172,7 +224,9 @@ function matches(row, filters) {
       case "neq":
         return String(cell) !== value;
       case "is":
-        return value === "null" ? cell === null : String(cell) === value;
+        // Postgres NULL: the row simply has no key in this in-memory store.
+        if (value === "null") return cell === null || cell === undefined;
+        return String(cell) === value;
       case "gt":
         return cell > value;
       case "in": {
@@ -361,10 +415,15 @@ const server = createServer(async (req, res) => {
     if (!rows) return send(res, 404, { message: `relation "${table}" not mocked` });
 
     const { filters, select } = parseFilters(url);
+    const orFilters = parseOrFilter(url);
     const single = wantsSingleObject(req);
 
+    /** AND of parseFilters, OR of the `or=(...)` list. */
+    const rowMatches = (row) =>
+      matches(row, filters) && (!orFilters || orFilters.some((filter) => matches(row, [filter])));
+
     if (req.method === "GET") {
-      const matched = rows.filter((row) => matches(row, filters));
+      const matched = rows.filter(rowMatches);
       if (single) {
         if (matched.length !== 1) {
           return send(res, 406, {
@@ -382,7 +441,7 @@ const server = createServer(async (req, res) => {
       const body = await readBody(req);
       const incoming = Array.isArray(body) ? body : [body];
       const onConflict = url.searchParams.get("on_conflict");
-      const prefer = req.headers.prefer ?? "";
+      const prefer = (req.headers.prefer ?? "").toString();
       const mergeDuplicates = prefer.includes("merge-duplicates");
 
       const saved = incoming.map((item) => {
@@ -408,14 +467,25 @@ const server = createServer(async (req, res) => {
 
     if (req.method === "PATCH") {
       const body = await readBody(req);
-      const matched = rows.filter((row) => matches(row, filters));
+      const matched = rows.filter(rowMatches);
       for (const row of matched) Object.assign(row, body ?? {});
+      if ((req.headers.prefer ?? "").toString().includes("return=representation")) {
+        if (single) {
+          return matched.length === 1
+            ? send(res, 200, project(matched[0], select))
+            : send(res, 406, { code: "PGRST116", message: "JSON object requested, multiple (or no) rows returned" });
+        }
+        return send(res, 200, matched.map((row) => project(row, select)));
+      }
       return send(res, 204, undefined);
     }
 
     if (req.method === "DELETE") {
-      const keep = rows.filter((row) => !matches(row, filters));
+      const keep = rows.filter((row) => !rowMatches(row));
       db[table] = keep;
+      if ((req.headers.prefer ?? "").toString().includes("return=representation")) {
+        return send(res, 200, []);
+      }
       return send(res, 204, undefined);
     }
 
@@ -440,5 +510,6 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`   admin username : ${ADMIN_USERNAME}`);
   console.log(`   admin password : ${ADMIN_PASSWORD}`);
   console.log(`   staff login    : ${STAFF_USERNAME} / ${STAFF_PASSWORD}`);
+  console.log(`   driver login   : drv-demo / ${process.env.MOCK_DRIVER_PASSWORD ?? "DriverDemo#2026"}`);
   console.log("──────────────────────────────────────────────────────────");
 });

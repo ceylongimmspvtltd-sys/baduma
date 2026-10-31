@@ -328,6 +328,17 @@ Verified output (2026-10-31):
 🎉 end-to-end auth flow works — 17/17
 ```
 
+Ordering pipeline (cart → POS → driver → admin):
+
+```bash
+BASE_URL=http://127.0.0.1:3112 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_ANON_KEY=mock-anon-key \
+CUSTOMER_EMAIL=customer@example.com CUSTOMER_PASSWORD='CustomerDemo#2026' \
+STAFF_USERNAME=mgr-demo STAFF_PASSWORD='StaffDemo#2026' \
+DRIVER_USERNAME=drv-demo DRIVER_PASSWORD='DriverDemo#2026' \
+ADMIN_IDENTIFIER=baduma-admin ADMIN_PASSWORD='AdminDemo#2026' \
+npm run test:orders      # 23/23
+```
+
 The emulator is a **test double only** (`scripts/dev-supabase-mock.mjs`). It is
 not secure and must never be deployed.
 

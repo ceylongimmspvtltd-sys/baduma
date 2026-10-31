@@ -392,6 +392,50 @@ grant execute on function public.complete_loyalty_task(text) to authenticated;
 grant execute on function public.is_admin() to anon, authenticated, service_role;
 
 -- ---------------------------------------------------------------------
+-- 4b. Ordering pipeline (2026-11-01)
+--
+-- Customers READ their own orders; every write happens in the API routes with
+-- the service role after authentication + server-side re-pricing. See
+-- supabase/migrations/20261101_orders.sql for the standalone version.
+-- ---------------------------------------------------------------------
+
+create table if not exists public.orders (
+  id                uuid primary key default gen_random_uuid(),
+  code              text not null unique,
+  user_id           uuid references auth.users(id) on delete set null,
+  customer_name     text not null,
+  customer_phone    text not null,
+  delivery_address  text not null,
+  notes             text,
+  payment_method    text not null default 'cash' check (payment_method in ('cash', 'card')),
+  status            text not null default 'pending'
+                    check (status in ('pending','accepted','preparing','out_for_delivery','delivered','cancelled')),
+  subtotal          numeric(10, 2) not null default 0 check (subtotal >= 0),
+  delivery_fee      numeric(10, 2) not null default 0 check (delivery_fee >= 0),
+  total             numeric(10, 2) not null default 0 check (total >= 0),
+  driver_id         uuid references public.employees(id) on delete set null,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+create table if not exists public.order_items (
+  id          uuid primary key default gen_random_uuid(),
+  order_id    uuid not null references public.orders(id) on delete cascade,
+  product_id  uuid references public.products(id) on delete set null,
+  name        text not null,
+  size        text not null check (size in ('normal', 'full')),
+  unit_price  numeric(10, 2) not null check (unit_price >= 0),
+  quantity    integer not null check (quantity between 1 and 50),
+  line_total  numeric(10, 2) not null check (line_total >= 0),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists orders_user_created_idx   on public.orders (user_id, created_at desc);
+create index if not exists orders_status_created_idx on public.orders (status, created_at desc);
+create index if not exists orders_driver_idx         on public.orders (driver_id);
+create index if not exists order_items_order_idx     on public.order_items (order_id);
+
+-- ---------------------------------------------------------------------
 -- 5. Triggers
 -- ---------------------------------------------------------------------
 
@@ -434,6 +478,8 @@ alter table public.loyalty_events  enable row level security;
 alter table public.employees       enable row level security;
 alter table public.admin_users     enable row level security;
 alter table public.settings        enable row level security;
+alter table public.orders          enable row level security;
+alter table public.order_items     enable row level security;
 alter table public.reward_redemptions enable row level security;
 
 -- Public (anonymous storefront) reads active menu items only.
@@ -542,6 +588,33 @@ create policy "reward_redemptions_own_read" on public.reward_redemptions
 revoke insert, update, delete on public.reward_redemptions from anon, authenticated;
 grant select on public.reward_redemptions to authenticated;
 grant select, insert, update, delete on public.reward_redemptions to service_role;
+
+-- Orders: customers read their own rows, admins read everything, nobody writes
+-- directly (the API routes use the service role).
+drop policy if exists "orders_own_read" on public.orders;
+create policy "orders_own_read" on public.orders
+  for select to authenticated using (auth.uid() = user_id);
+
+drop policy if exists "order_items_own_read" on public.order_items;
+create policy "order_items_own_read" on public.order_items
+  for select to authenticated using (
+    exists (select 1 from public.orders o where o.id = order_items.order_id and o.user_id = auth.uid())
+  );
+
+drop policy if exists "orders_admin_read" on public.orders;
+create policy "orders_admin_read" on public.orders
+  for select to authenticated using (public.is_admin());
+
+drop policy if exists "order_items_admin_read" on public.order_items;
+create policy "order_items_admin_read" on public.order_items
+  for select to authenticated using (public.is_admin());
+
+revoke insert, update, delete on public.orders from anon, authenticated;
+revoke insert, update, delete on public.order_items from anon, authenticated;
+grant select on public.orders to authenticated;
+grant select on public.order_items to authenticated;
+grant all on public.orders to service_role;
+grant all on public.order_items to service_role;
 
 -- ---------------------------------------------------------------------
 -- 7. Storage

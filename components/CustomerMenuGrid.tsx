@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { menuCategories, type MenuItem } from "@/lib/menu";
+import { useCart } from "@/lib/cart";
+import { formatLKR } from "@/lib/orders";
 
 /**
  * Storefront menu grid (client) — category filter + product cards.
@@ -14,6 +16,25 @@ import { menuCategories, type MenuItem } from "@/lib/menu";
 export default function CustomerMenuGrid({ items }: { items: MenuItem[] }) {
   const categories = menuCategories(items);
   const [activeCategory, setActiveCategory] = useState("ALL");
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+  const cart = useCart();
+
+  function addToCart(item: MenuItem) {
+    // Cheapest available portion is a sensible default; the cart lets you switch.
+    const size = item.normalPrice ? "normal" : "full";
+    const unitPrice = item.normalPrice ?? item.fullPrice ?? 0;
+    if (!unitPrice) return;
+    cart.add({
+      productId: item.id,
+      name: item.name,
+      image: item.image,
+      size,
+      unitPrice,
+      quantity: 1,
+    });
+    setJustAdded(item.id);
+    setTimeout(() => setJustAdded((current) => (current === item.id ? null : current)), 1500);
+  }
 
   const filteredItems =
     activeCategory === "ALL" ? items : items.filter((item) => item.category === activeCategory);
@@ -84,10 +105,18 @@ export default function CustomerMenuGrid({ items }: { items: MenuItem[] }) {
                 ) : null}
               </div>
 
-              {/* CTA */}
-              <div className="w-full mt-4 py-4 rounded-xl font-black text-[#121212] bg-[#D4AF37] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#8a6d1a] flex items-center justify-center gap-2">
-                <span>🛒</span> ADD TO CART
-              </div>
+              {/* CTA — real add-to-cart (the card itself links to the detail page) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addToCart(item);
+                }}
+                className="w-full mt-4 py-4 rounded-xl font-black text-[#121212] bg-[#D4AF37] shadow-[5px_5px_10px_#070707,-5px_-5px_10px_#8a6d1a] flex items-center justify-center gap-2 active:shadow-[inset_4px_4px_8px_#8a6d1a] transition-all"
+              >
+                <span>🛒</span> {justAdded === item.id ? "ADDED ✓" : "ADD TO CART"}
+              </button>
             </Link>
           ))}
         </div>

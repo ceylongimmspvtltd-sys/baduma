@@ -52,6 +52,22 @@ BASE_URL=http://localhost:3000 EMPLOYEE_SESSION_SECRET=... npm run verify:securi
 25 automated checks: anonymous/forged session rejection, token-planting refusal, staff role
 matrix, rate limiting and security headers. Exits non-zero if anything regresses, so it can run in CI.
 
+## The ordering pipeline
+
+| Step | Where | What happens |
+|---|---|---|
+| Add to cart | `/` and `/product/[id]` | Client cart (localStorage), live count in the nav |
+| Checkout | `/cart` | Needs an OTP session; sends **ids/sizes/quantities only** |
+| Price | `POST /api/orders` | Re-reads `public.products`, ignores client prices, rejects inactive items, snapshots line totals |
+| Kitchen/POS | `/pos` | Accept → prepare → dispatch, driver assignment (Manager) |
+| Delivery | `/driver` | Driver sees assigned runs, calls, opens Maps, marks delivered |
+| Tracking | `/track-orders` | Customer's own orders + status timeline, cancel while pending |
+| Oversight | `/admin/orders` | Every order, force status, assign drivers |
+
+Order statuses: `pending → accepted → preparing → out_for_delivery → delivered` (or `cancelled`), with
+every transition validated server-side by role. Customers can only read their own orders (RLS);
+all writes go through the API with the service role after authentication.
+
 ## What the backend can now do
 
 | Screen | Behaviour |
@@ -65,8 +81,9 @@ matrix, rate limiting and security headers. Exits non-zero if anything regresses
 | `/employee/login` → `/pos` | Staff sign-in; Managers + Kitchen get the order board |
 | `/employee/login` → `/driver` | Drivers get the delivery screen |
 
-The cart, checkout, `/admin/orders` and `/track-orders` screens are still placeholders — the orders
-pipeline is the remaining product work (see the roadmap in `docs/security-audit.md`).
+Run the whole pipeline offline against the bundled Supabase emulator — see
+`docs/backend-auth-setup.md` §5.1. Still missing (product scope, not security): real card payments,
+push/ETA notifications, and multi-branch support.
 
 ## Documentation
 

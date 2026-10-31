@@ -10,7 +10,8 @@
     "verify:security": "node scripts/verify-security.mjs",
     "create:admin": "node scripts/create-admin.mjs",
     "dev:mock": "node scripts/dev-supabase-mock.mjs",
-    "test:e2e": "node scripts/e2e-auth-check.mjs"
+    "test:e2e": "node scripts/e2e-auth-check.mjs",
+    "test:orders": "node scripts/e2e-orders.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.15.0",
