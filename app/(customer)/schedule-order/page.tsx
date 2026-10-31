@@ -51,7 +51,7 @@ export default function ScheduleOrderPage() {
             Your delivery is set for <span className="text-white">{formatted()}</span>
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            We'll confirm by phone before dispatching. Thank you for choosing බැදුම!
+            We'll confirm by phone before dispatching. Thank you for your order!
           </p>
           <button
             type="button"

@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { getLogoForSlot } from '@/lib/logos';
 
 const NAV_LINKS = [
   { name: 'Account / Profile', href: '/profile', icon: '👤' },
@@ -10,6 +12,9 @@ const NAV_LINKS = [
   { name: 'Food Schedule', href: '/schedule-order', icon: '📅' },
   { name: 'Settings & Help Center', href: '/settings', icon: '⚙️' },
 ];
+
+// Automatically selected transparent logo for the drawer header/footer
+const navLogo = getLogoForSlot('nav');
 
 export default function MobileSidebarDrawer() {
   const pathname = usePathname();
@@ -84,10 +89,7 @@ export default function MobileSidebarDrawer() {
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-6 py-6 border-b border-[#1d1d1d] shadow-[0_8px_16px_#070707,inset_0_-1px_0_#2a2a2a]">
-          <div>
-            <p className="text-[#D4AF37] font-black text-2xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">බැදුම</p>
-            <p className="text-[9px] text-gray-500 tracking-widest font-semibold uppercase mt-1">නගරේ රහට * ගානට</p>
-          </div>
+          <Image src={navLogo.src} alt="Baduma" width={49} height={40} className="h-10 w-auto" />
           <button
             type="button"
             aria-label="Close menu"
@@ -201,9 +203,7 @@ export default function MobileSidebarDrawer() {
 
           {/* Drawer Footer */}
           <div className="mt-auto pt-4 px-2">
-            <p className="text-[10px] text-gray-600 font-bold tracking-widest uppercase text-center">
-              බැදුම · නගරේ රහට * ගානට
-            </p>
+            <Image src={navLogo.src} alt="Baduma" width={43} height={35} className="h-9 w-auto mx-auto opacity-80" />
           </div>
         </div>
       </aside>

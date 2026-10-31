@@ -31,11 +31,8 @@ export default function ProductMenu() {
     <div className="w-full py-6">
       {/* Brand Header Banner */}
       <div className="mb-10 text-center p-8 rounded-3xl bg-[#121212] shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] border border-[#1d1d1d]">
-        <span className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d]">
-          බැදුම නගරේ රහට * ගානට
-        </span>
         <h1 className="text-4xl font-black text-white mt-4 mb-2 tracking-wide">
-          බැදුම Digital Menu
+          Digital Menu
         </h1>
         <p className="text-sm text-gray-400">
           Freshly cooked from Malgammana, Kandy. Order your favorites instantly.
