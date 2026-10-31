@@ -1,32 +1,46 @@
-// app/(customer)/page.tsx
 import Image from 'next/image';
-import ProductMenu from '@/components/ProductMenu'; // කලින් සෑදූ Menu Component එක
-import { createServerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 
-export default async function CustomerHomePage() {
-  // සත්‍ය දත්ත ලබා ගැනීමට Supabase සම්බන්ධ කිරීම (උදාහරණයක්)
-  // const supabase = createServerClient({ cookies });
-  // const { data: products } = await supabase.from('products').select('*');
-
+export default function CustomerHomePage() {
   return (
-    <div className="flex flex-col items-center w-full mt-4">
-      {/* 3D Neumorphic Logo Section */}
-      <div className="w-full max-w-4xl p-8 mb-12 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] flex flex-col items-center justify-center border border-[#1d1d1d]/50 text-center">
-        <h1 className="text-6xl md:text-8xl font-black text-[#FFD700] tracking-tighter drop-shadow-[0_4px_6px_rgba(0,0,0,0.9)] mb-4">
-          බැදුම
-        </h1>
-        <div className="px-6 py-2 rounded-full bg-[#121212] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d]">
-          <p className="text-[#FFD700] text-sm md:text-lg font-bold tracking-[0.2em]">
-            නගරේ රහට <span className="text-gray-400 mx-2">*</span> ගානට
-          </p>
+    <div className="flex flex-col gap-12 pt-4">
+      {/* Hero Banner Section using PR #10 asset */}
+      <div className="relative w-full h-[400px] rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d] overflow-hidden group">
+        <Image
+          src="/images/hero-banner-mockup.jpg"
+          alt="Baduma.sl Hero Banner"
+          fill
+          className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent flex flex-col justify-end p-10">
+          <h1 className="text-5xl font-black text-[#FFD700] drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] mb-2">බැදුම[cite: 4]</h1>
+          <p className="text-lg text-white font-bold tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">නගරේ රහට * ගානට[cite: 4]</p>
         </div>
       </div>
 
-      {/* නිෂ්පාදන මෙනුව (Product Menu) */}
-      <div className="w-full">
-        {/* මෙහි backend එකෙන් එන products pass කළ හැක. දැනට අපි කලින් හැදූ component එක පෙන්වමු */}
-        <ProductMenu /> 
+      {/* PR #10 Secondary Pattern: Menu Card Mockups Implementation */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="p-8 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d] flex flex-col items-center justify-center">
+          <div className="w-full relative aspect-video rounded-2xl overflow-hidden shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] mb-6">
+            <Image src="/images/menu-card-mockup.jpg" alt="Menu Patterns" fill className="object-cover opacity-90" />
+          </div>
+          <h3 className="text-xl font-bold text-[#FFD700] w-full text-left mb-2">Explore the Menu</h3>
+          <p className="text-sm text-gray-400 w-full text-left mb-6">Experience our signature Fried Rice, Kottu, and Pasta selections.</p>
+          <button className="w-full py-4 rounded-xl font-black text-[#121212] bg-[#FFD700] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#332b00] active:shadow-[inset_4px_4px_8px_#ccac00,inset_-4px_-4px_8px_#ffea4d] transition-all tracking-wider">
+            View Full Menu
+          </button>
+        </div>
+
+        <div className="p-8 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d] flex flex-col items-center justify-center">
+           <div className="w-full relative aspect-video rounded-2xl overflow-hidden shadow-[inset_6px_6px_12px_#070707,inset_-6px_-6px_12px_#1d1d1d] mb-6">
+            <Image src="/images/social-post-mockup.jpg" alt="Social Post Integration" fill className="object-cover opacity-90" />
+          </div>
+          <h3 className="text-xl font-bold text-[#FFD700] w-full text-left mb-2">Join Our Community</h3>
+          <p className="text-sm text-gray-400 w-full text-left mb-6">Follow us on Instagram and Facebook for the latest offers.</p>
+           <button className="w-full py-4 rounded-xl font-black text-gray-300 bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] active:shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] transition-all tracking-wider hover:text-[#FFD700]">
+            Follow Baduma.sl
+          </button>
+        </div>
       </div>
     </div>
   );
