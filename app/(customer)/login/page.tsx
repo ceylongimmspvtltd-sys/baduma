@@ -16,9 +16,9 @@ export default function CustomerOTPLogin() {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
-    
+
     const isEmail = identifier.includes('@');
-    const { error } = isEmail 
+    const { error } = isEmail
       ? await supabase.auth.signInWithOtp({ email: identifier })
       : await supabase.auth.signInWithOtp({ phone: identifier });
 
@@ -43,6 +43,7 @@ export default function CustomerOTPLogin() {
     );
 
     if (data?.user) {
+      // Instant redirect to profile upon OTP verification (Frictionless)
       router.push('/profile');
     } else {
       setErrorMsg(error?.message || 'Invalid verification code.');
@@ -53,18 +54,18 @@ export default function CustomerOTPLogin() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
       <div className="w-full max-w-md p-10 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d]">
-        
+
         <div className="text-center mb-10">
           <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-md">
             {step === 'request' ? 'Sign In' : 'Verify'}
           </h2>
           <p className="text-sm text-gray-400 font-medium">
-            {step === 'request' 
-              ? 'Enter Mobile Number or Email' 
+            {step === 'request'
+              ? 'Enter Phone Number or Email'
               : `Secure code sent to ${identifier}`}
           </p>
         </div>
-        
+
         {step === 'request' ? (
           <form onSubmit={handleSendOTP} className="flex flex-col gap-6">
             <input
