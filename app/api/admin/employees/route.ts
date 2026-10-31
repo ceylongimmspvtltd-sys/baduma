@@ -1,109 +1,133 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { randomBytes } from 'crypto';
-import { ADMIN_COOKIE, decodeJwtPayload, isAdminToken } from '@/lib/adminAuth';
-import { hashPassword } from '@/lib/employeeAuth';
+import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_COOKIE, getAdminIdentity } from "@/lib/adminAuth";
+import { generateStaffPassword, generateStaffUsername, hashPassword } from "@/lib/employeeAuth";
+import { createServiceClient, getServiceRoleKey } from "@/lib/supabaseServer";
+import { rateLimit } from "@/lib/rateLimit";
 
 /**
  * Employee account management (Master Admin only).
- * POST   -> generates username + password, creates an employee account.
- * DELETE -> removes an employee account.
+ *
+ * POST   → generates username + password, creates a staff account.
+ * GET    → lists staff accounts (used as a server-side fallback for the UI).
+ * DELETE → revokes a staff account.
+ *
+ * Hardening vs. the previous version:
+ *   - the caller's cookie is *verified* against Supabase Auth, and the role is
+ *     read from `app_metadata` (the old check only decoded the JWT and trusted
+ *     `user_metadata.role`, which any user can write).
+ *   - writes go through the service-role client, so a stolen customer JWT can
+ *     never insert into `public.employees`.
+ *   - passwords are 96-bit random instead of 48-bit, and are returned exactly
+ *     once, over a no-store response.
+ *   - the admin sub comes from the verified user, not from an unverified token.
  */
 
-const POSITIONS = ['Manager', 'Kitchen', 'Driver'];
-const PERMISSION_LEVELS = ['full', 'orders', 'delivery', 'viewer'];
+const POSITIONS = ["Manager", "Kitchen", "Driver"] as const;
+const PERMISSION_LEVELS = ["full", "orders", "delivery", "viewer"] as const;
 
-function requireSupabaseEnv() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.json(
-      { error: 'Supabase environment variables are not configured.' },
-      { status: 500 }
-    );
-  }
-  return null;
+function noStore(json: unknown, status = 200) {
+  return NextResponse.json(json, { status, headers: { "Cache-Control": "no-store" } });
+}
+
+async function requireAdmin(req: NextRequest) {
+  const identity = await getAdminIdentity(req.cookies.get(ADMIN_COOKIE)?.value);
+  if (!identity) return { error: noStore({ error: "Unauthorized" }, 401) } as const;
+  return { identity } as const;
+}
+
+export async function GET(req: NextRequest) {
+  const auth = await requireAdmin(req);
+  if ("error" in auth) return auth.error;
+  if (!getServiceRoleKey()) return noStore({ error: "Server is missing SUPABASE_SERVICE_ROLE_KEY." }, 500);
+
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("employees")
+    .select("id, username, full_name, contact, position, permission_level, is_active, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) return noStore({ error: error.message }, 500);
+  return noStore({ employees: data ?? [] });
 }
 
 export async function POST(req: NextRequest) {
-  const token = req.cookies.get(ADMIN_COOKIE)?.value;
-  if (!isAdminToken(token)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await requireAdmin(req);
+  if ("error" in auth) return auth.error;
+
+  // Creating staff accounts is a privileged, auditable action — throttle it.
+  const limit = rateLimit(`admin-employees:${auth.identity.user.id}`, 20, 60_000);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many account creations. Please slow down." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds), "Cache-Control": "no-store" } }
+    );
   }
 
-  const envError = requireSupabaseEnv();
-  if (envError) return envError;
-
-  const { position, permission_level, full_name, contact } = await req.json().catch(() => ({}));
-  if (!POSITIONS.includes(position)) {
-    return NextResponse.json({ error: 'Invalid job position.' }, { status: 400 });
-  }
-  if (!PERMISSION_LEVELS.includes(permission_level)) {
-    return NextResponse.json({ error: 'Invalid permission level.' }, { status: 400 });
+  if (!getServiceRoleKey()) {
+    return noStore({ error: "Server is missing SUPABASE_SERVICE_ROLE_KEY." }, 500);
   }
 
-  const username = `${position.toLowerCase().slice(0, 3)}${randomBytes(3).toString('hex')}`;
-  const password = randomBytes(6).toString('base64url').slice(0, 12);
-  const adminSub = decodeJwtPayload(token)?.sub;
+  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  const position = typeof body.position === "string" ? body.position : "";
+  const permission = typeof body.permission_level === "string" ? body.permission_level : "";
+  const fullName = typeof body.full_name === "string" ? body.full_name.trim().slice(0, 120) : null;
+  const contact = typeof body.contact === "string" ? body.contact.trim().slice(0, 160) : null;
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${token}` } } }
-  );
+  if (!(POSITIONS as readonly string[]).includes(position)) {
+    return noStore({ error: "Invalid job position." }, 400);
+  }
+  if (!(PERMISSION_LEVELS as readonly string[]).includes(permission)) {
+    return noStore({ error: "Invalid permission level." }, 400);
+  }
+  // A driver must never get full manager rights.
+  if (position === "Driver" && (permission === "full" || permission === "orders")) {
+    return noStore({ error: "Drivers can only be granted 'delivery' or 'viewer' permission." }, 400);
+  }
 
+  const username = generateStaffUsername(position);
+  const password = generateStaffPassword();
+
+  const supabase = createServiceClient();
   const { data, error } = await supabase
-    .from('employees')
+    .from("employees")
     .insert({
       username,
       password_hash: hashPassword(password),
-      full_name: typeof full_name === 'string' ? full_name.trim() : null,
-      contact: typeof contact === 'string' ? contact.trim() : null,
+      full_name: fullName || null,
+      contact: contact || null,
       position,
-      permission_level,
+      permission_level: permission,
       is_active: true,
-      created_by: adminSub,
+      created_by: auth.identity.user.id,
     })
-    .select('id, username, full_name, contact, position, permission_level')
+    .select("id, username, full_name, contact, position, permission_level")
     .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  if (error) return noStore({ error: error.message }, 500);
 
   const origin = new URL(req.url).origin;
-  return NextResponse.json(
+  return noStore(
     {
       employee: data,
-      password,
-      login_url: `${origin}/employee/login?emp=${username}`,
+      password, // shown once in the admin UI; never persisted in plaintext
+      login_url: `${origin}/employee/login?emp=${encodeURIComponent(username)}`,
     },
-    { status: 201 }
+    201
   );
 }
 
 export async function DELETE(req: NextRequest) {
-  const token = req.cookies.get(ADMIN_COOKIE)?.value;
-  if (!isAdminToken(token)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await requireAdmin(req);
+  if ("error" in auth) return auth.error;
+  if (!getServiceRoleKey()) return noStore({ error: "Server is missing SUPABASE_SERVICE_ROLE_KEY." }, 500);
+
+  const { id } = (await req.json().catch(() => ({}))) as { id?: unknown };
+  if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) {
+    return noStore({ error: "Employee id required." }, 400);
   }
 
-  const envError = requireSupabaseEnv();
-  if (envError) return envError;
-
-  const { id } = await req.json().catch(() => ({}));
-  if (!id || typeof id !== 'string') {
-    return NextResponse.json({ error: 'Employee id required.' }, { status: 400 });
-  }
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${token}` } } }
-  );
-
-  const { error } = await supabase.from('employees').delete().eq('id', id);
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
+  const supabase = createServiceClient();
+  const { error } = await supabase.from("employees").delete().eq("id", id);
+  if (error) return noStore({ error: error.message }, 500);
+  return noStore({ success: true });
 }

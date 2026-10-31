@@ -1,57 +1,68 @@
 /**
- * Employee session helpers: HMAC-signed token + scrypt password hashing.
- * Used by app/api/admin/employees and app/api/employee/login (Node runtime).
+ * lib/employeeAuth.ts — Node-only staff credential helpers.
+ *
+ * Password hashing (scrypt) lives here because it needs Node's `crypto`.
+ * Session signing/verification is delegated to the Edge-safe
+ * `lib/employeeSession.ts` so middleware can use the exact same logic.
+ *
+ * ⚠️ Do not import this file from `middleware.ts` (Edge) or from a Client
+ * Component: it pulls in `node:crypto`.
  */
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 
-export const EMPLOYEE_COOKIE = 'employee_session';
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
-const SECRET = process.env.EMPLOYEE_SESSION_SECRET || 'dev-only-insecure-secret-change-me';
+export {
+  EMPLOYEE_COOKIE,
+  EMPLOYEE_LOGIN_PATH,
+  EMPLOYEE_SECRET_ENV,
+  EMPLOYEE_TOKEN_TTL_SECONDS,
+  ROLE_HOME,
+  getEmployeeSecret,
+  signEmployeeToken,
+  verifyEmployeeToken,
+  canAccessPath,
+  type EmployeeToken,
+} from "./employeeSession";
 
-export type EmployeeToken = {
-  sub: string; // employee id
-  username: string;
-  position: string;
-  permission_level: string;
-  exp: number;
-};
+const SCRYPT_KEYLEN = 64;
+const SCRYPT_PARAMS = { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 } as const;
 
-export function signEmployeeToken(
-  payload: Omit<EmployeeToken, 'exp'>,
-  ttlSeconds = 60 * 60 * 24 * 7
-): string {
-  const full: EmployeeToken = { ...payload, exp: Math.floor(Date.now() / 1000) + ttlSeconds };
-  const body = Buffer.from(JSON.stringify(full)).toString('base64url');
-  const sig = createHmac('sha256', SECRET).update(body).digest('base64url');
-  return `${body}.${sig}`;
-}
-
-export function verifyEmployeeToken(token: string | undefined | null): EmployeeToken | null {
-  if (!token || !token.includes('.')) return null;
-  const [body, sig] = token.split('.');
-  const expected = createHmac('sha256', SECRET).update(body).digest('base64url');
-  const sigBuf = Buffer.from(sig);
-  const expBuf = Buffer.from(expected);
-  if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) return null;
-  try {
-    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as EmployeeToken;
-    if (!payload.exp || payload.exp <= Math.floor(Date.now() / 1000)) return null;
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
+/** Hash a password as `scrypt$<salt>$<hash>`. */
 export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString('hex');
-  const hash = scryptSync(password, salt, 64).toString('hex');
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, SCRYPT_KEYLEN, SCRYPT_PARAMS).toString("hex");
   return `scrypt$${salt}$${hash}`;
 }
 
+/** Constant-time password verification against a stored `scrypt$...` value. */
 export function verifyPassword(password: string, stored: string): boolean {
-  const [scheme, salt, hash] = stored.split('$');
-  if (scheme !== 'scrypt' || !salt || !hash) return false;
-  const computed = scryptSync(password, salt, 64);
-  const expected = Buffer.from(hash, 'hex');
-  return computed.length === expected.length && timingSafeEqual(computed, expected);
+  if (typeof stored !== "string") return false;
+  const [scheme, salt, hash] = stored.split("$");
+  if (scheme !== "scrypt" || !salt || !hash) return false;
+  try {
+    const computed = scryptSync(password, salt, SCRYPT_KEYLEN, SCRYPT_PARAMS);
+    const expected = Buffer.from(hash, "hex");
+    if (expected.length !== computed.length) return false;
+    return timingSafeEqual(computed, expected);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Dummy hash used to equalise response time when a username does not exist,
+ * so the login endpoint cannot be used for username enumeration.
+ * The plaintext is random and discarded: no password can ever match it.
+ */
+export const DUMMY_PASSWORD_HASH = `scrypt$${randomBytes(16).toString("hex")}$${randomBytes(SCRYPT_KEYLEN).toString("hex")}`;
+
+/** Strong, human-shareable temporary staff password (96 bits of entropy). */
+export function generateStaffPassword(): string {
+  return randomBytes(12).toString("base64url");
+}
+
+/** Staff usernames: `<role-prefix><6 hex>` e.g. `mgr1a2b3c`. */
+export function generateStaffUsername(position: string): string {
+  const prefix = position.toLowerCase().slice(0, 3).replace(/[^a-z]/g, "") || "stf";
+  return `${prefix}${randomBytes(3).toString("hex")}`;
 }

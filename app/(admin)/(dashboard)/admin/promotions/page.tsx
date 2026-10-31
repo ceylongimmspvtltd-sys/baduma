@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseAdmin as supabase } from "@/lib/supabaseAdminClient";
 
 type Combo = {
   id: string;
@@ -131,20 +131,24 @@ export default function AdminPromotionsPage() {
       price: Number(comboForm.price) || 0,
       is_active: comboForm.is_active,
     };
+    // Capture the id locally — never mutate the state object while saving.
+    let comboId = comboForm.id;
     try {
-      if (comboForm.id) {
-        const { error: err } = await supabase.from("combos").update({ ...row, updated_at: new Date() }).eq("id", comboForm.id);
+      if (comboId) {
+        const { error: err } = await supabase.from("combos").update({ ...row, updated_at: new Date() }).eq("id", comboId);
         if (err) throw err;
-        await supabase.from("combo_addons").delete().eq("combo_id", comboForm.id);
+        const { error: unlinkErr } = await supabase.from("combo_addons").delete().eq("combo_id", comboId);
+        if (unlinkErr) throw unlinkErr;
       } else {
         const { data, error: err } = await supabase.from("combos").insert([row]).select("id").single();
         if (err) throw err;
-        comboForm.id = data.id;
+        comboId = data.id;
       }
       if (comboForm.addonIds.length > 0) {
-        await supabase.from("combo_addons").insert(
-          comboForm.addonIds.map((addon_id) => ({ combo_id: comboForm.id, addon_id }))
+        const { error: linkErr } = await supabase.from("combo_addons").insert(
+          comboForm.addonIds.map((addon_id) => ({ combo_id: comboId, addon_id }))
         );
+        if (linkErr) throw linkErr;
       }
       setComboForm(null);
       await loadAll();

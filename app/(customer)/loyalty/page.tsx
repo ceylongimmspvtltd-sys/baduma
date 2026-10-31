@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
-const POINTS = 1250;
 const NEXT_THRESHOLD = 2000;
 
 const PROMOS = [
@@ -19,13 +20,60 @@ const REWARDS = [
 ];
 
 export default function LoyaltyPage() {
+  const router = useRouter();
+  const [points, setPoints] = useState<number | null>(null);
   const [claimed, setClaimed] = useState<string[]>([]);
-  const progress = Math.round((POINTS / NEXT_THRESHOLD) * 100);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const claim = (id: string, cost: number) => {
-    if (claimed.includes(id) || POINTS < cost) return;
-    setClaimed((prev) => [...prev, id]);
-  };
+  const progress = Math.round(Math.min(100, ((points ?? 0) / NEXT_THRESHOLD) * 100));
+
+  /* Real balance for the signed-in customer (was a hard-coded 1250 constant). */
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+        if (!authData.user) {
+          router.replace('/login');
+          return;
+        }
+        const { data, error: profileError } = await supabase
+          .from('profiles')
+          .select('points')
+          .eq('user_id', authData.user.id)
+          .maybeSingle();
+        if (profileError) throw profileError;
+        setPoints(data?.points ?? 0);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Could not load your points.');
+        setPoints(0);
+      }
+    })();
+  }, [router]);
+
+  /**
+   * Redeem a reward. The spend is validated server-side by the
+   * `redeem_loyalty_reward()` RPC (amount is never trusted from the client).
+   */
+  async function claim(id: string, cost: number) {
+    if (busy || claimed.includes(id) || (points ?? 0) < cost) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { data, error: rpcError } = await supabase.rpc('redeem_loyalty_reward', {
+        p_reward_id: id,
+        p_cost: cost,
+      });
+      if (rpcError) throw rpcError;
+      if (typeof data === 'number') setPoints(data);
+      setClaimed((prev) => [...prev, id]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not redeem this reward.');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-8 pt-4 max-w-3xl mx-auto">
@@ -35,6 +83,12 @@ export default function LoyaltyPage() {
         <h1 className="text-3xl font-black text-white mb-1 tracking-wide">🏆 Loyalty Rewards</h1>
         <p className="text-sm text-gray-400 font-bold">Loyal Customer Promotions — earn points, claim rewards</p>
       </div>
+
+      {error && (
+        <div className="p-3 rounded-xl bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] border border-red-500/40 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Membership Card */}
       <div className="p-8 rounded-[2rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a,0_0_30px_rgba(212,175,55,0.15)] border border-[#1d1d1d]">
@@ -49,7 +103,8 @@ export default function LoyaltyPage() {
         <div className="mt-6">
           <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Your Points</p>
           <p className="text-4xl font-black text-white mt-1">
-            {POINTS.toLocaleString()} <span className="text-sm text-gray-500 font-bold">pts</span>
+            {points === null ? '…' : points.toLocaleString()}{' '}
+            <span className="text-sm text-gray-500 font-bold">pts</span>
           </p>
         </div>
 
@@ -62,7 +117,7 @@ export default function LoyaltyPage() {
             />
           </div>
           <p className="text-[10px] text-gray-500 font-bold mt-2">
-            {NEXT_THRESHOLD - POINTS} pts to PLATINUM tier
+            {Math.max(0, NEXT_THRESHOLD - (points ?? 0))} pts to PLATINUM tier
           </p>
         </div>
       </div>
@@ -90,7 +145,7 @@ export default function LoyaltyPage() {
         <div className="flex flex-col gap-4">
           {REWARDS.map((r) => {
             const isClaimed = claimed.includes(r.id);
-            const canClaim = POINTS >= r.cost;
+            const canClaim = (points ?? 0) >= r.cost;
             return (
               <div
                 key={r.id}
@@ -107,7 +162,7 @@ export default function LoyaltyPage() {
                 <button
                   type="button"
                   onClick={() => claim(r.id, r.cost)}
-                  disabled={isClaimed || !canClaim}
+                  disabled={isClaimed || !canClaim || busy}
                   className={`px-5 py-3 rounded-xl font-black text-sm tracking-wider transition-all ${
                     isClaimed
                       ? 'bg-[#121212] text-[#D4AF37] shadow-[inset_3px_3px_6px_#070707]'

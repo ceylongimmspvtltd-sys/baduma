@@ -28,9 +28,26 @@ function normalizePhone(phone: unknown): string {
   return String(phone || '').replace(/[\s-]/g, '');
 }
 
+/** CORS — required for browser callers (see docs/whatsapp-otp-setup.md). */
+const CORS_HEADERS: Record<string, string> = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
+}
+
 export default async function handler(req: Request): Promise<Response> {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS_HEADERS });
+  }
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return json({ error: 'Method not allowed' }, 405);
   }
 
   const body = await req.json().catch(() => ({}));
@@ -38,27 +55,40 @@ export default async function handler(req: Request): Promise<Response> {
   const token = String(body.token || '');
 
   if (!/^\+?[0-9]{7,15}$/.test(phone) || !/^[0-9]{6}$/.test(token)) {
-    return new Response(JSON.stringify({ error: 'Invalid phone or token' }), { status: 400 });
+    return json({ error: 'Invalid phone or token' }, 400);
   }
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-  // 1. Check the OTP against the otp_codes table.
+  // 1. Look up the newest live code for this phone (attempts are tracked so a
+  //    6-digit code cannot be brute-forced inside its 10-minute window).
   const { data: otpRow, error: otpError } = await supabase
     .from('otp_codes')
-    .select('id')
+    .select('id, code, attempts')
     .eq('phone', phone)
-    .eq('code', token)
     .eq('used', false)
     .gt('expires_at', new Date().toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (otpError || !otpRow) {
-    return new Response(JSON.stringify({ error: 'Invalid or expired code' }), { status: 400 });
+    return json({ error: 'Invalid or expired code' }, 400);
+  }
+
+  const attempts = Number(otpRow.attempts ?? 0);
+  if (attempts >= 5) {
+    await supabase.from('otp_codes').update({ used: true }).eq('id', otpRow.id);
+    return json({ error: 'Too many attempts. Request a new code.' }, 429);
+  }
+
+  if (otpRow.code !== token) {
+    await supabase.from('otp_codes').update({ attempts: attempts + 1 }).eq('id', otpRow.id);
+    return json({ error: 'Invalid or expired code' }, 401);
   }
 
   // 2. Mark the OTP as used (single-use).
-  await supabase.from('otp_codes').update({ used: true }).eq('id', otpRow.id);
+  await supabase.from('otp_codes').update({ used: true, attempts: attempts + 1 }).eq('id', otpRow.id);
 
   // 3. Find an existing user for this phone, or create one.
   let user = null;
@@ -77,18 +107,19 @@ export default async function handler(req: Request): Promise<Response> {
       phone_confirm: true,
     });
     if (createError) {
-      return new Response(JSON.stringify({ error: createError.message }), { status: 400 });
+      return json({ error: createError.message }, 400);
     }
     user = created?.user || null;
   }
 
+  if (!user) {
+    return json({ error: 'Could not complete sign-in' }, 500);
+  }
+
   // 4. Return the user info. The client obtains a session via the native flow
   //    (signInWithOtp + verifyOtp) — see the setup guide.
-  return new Response(
-    JSON.stringify({
-      success: true,
-      user: { id: user.id, phone: user.phone },
-    }),
-    { status: 200 }
-  );
+  return json({
+    success: true,
+    user: { id: user.id, phone: user.phone },
+  });
 }
