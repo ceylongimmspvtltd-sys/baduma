@@ -366,7 +366,7 @@ returns table (
   id                uuid,
   username          text,
   password_hash     text,
-  position          text,
+  "position"        text,
   permission_level  text,
   is_active         boolean
 )

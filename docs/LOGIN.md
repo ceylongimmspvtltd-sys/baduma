@@ -47,7 +47,13 @@ Supabase Dashboard → ඔයාගේ project → **Project Settings → API**:
 
 ### පියවර 2 — Database එක හදන්න
 
-Supabase → **SQL Editor**. Files **3**ක් — **එකින් එක, මේ පිළිවෙලට** run කරන්න:
+> **ලේසිම ක්‍රමය:** `supabase/setup-all.sql` — files 3ම එකට තියෙන **එක file එකක්**.
+> ඒකේ **content එක** copy කරලා SQL Editor එකට paste කරලා **එකපාරක්** Run කරන්න. ඉවරයි.
+>
+> ⚠️ File එකේ **නම** (`supabase/migrations/otp_codes.sql`) paste කරන්න එපා — ඒකෙන්
+> `syntax error at or near "supabase"` එනවා. ඕනේ file එකේ **ඇතුලේ තියෙන code** එක.
+
+Supabase → **SQL Editor**. Files **3**ක් — **එකින් එක, මේ පිළිවෙලට** run කරන්න (හෝ උඩ කියපු setup-all.sql එක):
 
 | # | File | ඇයි මුලින්ම |
 |---|---|---|
