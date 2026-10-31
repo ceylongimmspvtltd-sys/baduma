@@ -11,6 +11,7 @@ export const metadata = {
 
 // Automatically select the best-fit transparent logo for each UI slot
 const navLogo = getLogoForSlot('nav');
+const heroLogo = getLogoForSlot('hero');
 const footerLogo = getLogoForSlot('footer');
 
 export default function CustomerLayout({
@@ -53,6 +54,58 @@ export default function CustomerLayout({
             <MobileSidebarDrawer />
           </div>
         </nav>
+
+        {/* ── Hero Banner ────────────────────────────────────────── */}
+        <section className="relative w-full h-[400px] md:h-[460px] mx-3 mb-6 rounded-[2rem] overflow-hidden shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d]">
+          <Image
+            src="/images/hero-restaurant.jpg"
+            alt="Baduma food cart at Pilimatalawa, Kandy"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 100vw"
+            className="object-cover"
+          />
+          {/* Legibility gradients (left-to-right + bottom fade) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#121212] via-[#121212]/75 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-[#121212]/40" />
+
+          <div className="relative z-10 h-full p-6 md:p-10 flex flex-col justify-between">
+            {/* Official Logo — left side */}
+            <div className="inline-flex items-center gap-3 p-2 rounded-2xl bg-[#121212]/80 backdrop-blur-md shadow-[4px_4px_10px_#070707,inset_0_0_0_1px_rgba(212,175,55,0.25)] self-start">
+              <Image src={heroLogo.src} alt="Baduma" width={59} height={48} className="h-12 w-auto" />
+            </div>
+
+            {/* Contact & Social Buttons — inside the hero */}
+            <div className="flex flex-wrap gap-3 max-w-lg">
+              {[
+                {
+                  icon: '📘',
+                  label: 'Facebook',
+                  href: 'https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr',
+                },
+                {
+                  icon: '📸',
+                  label: 'Instagram',
+                  href: 'https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr',
+                },
+                { icon: '💬', label: 'WhatsApp', href: 'https://wa.me/94779481682' },
+                { icon: '📍', label: 'Maps', href: 'https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic' },
+                { icon: '📞', label: 'Call', href: 'tel:+94770701682' },
+              ].map((btn) => (
+                <a
+                  key={btn.label}
+                  href={btn.href}
+                  target={btn.href.startsWith('tel:') ? undefined : '_blank'}
+                  rel="noreferrer"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl font-black text-[#121212] bg-[#D4AF37] shadow-[4px_4px_10px_#070707,-4px_-4px_10px_#8a6d1a] active:shadow-[inset_3px_3px_6px_#8a6d1a,inset_-3px_-3px_6px_#ffea4d] transition-all hover:brightness-110 text-sm tracking-wide"
+                >
+                  <span className="text-lg">{btn.icon}</span>
+                  {btn.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Main Content */}
         <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-2">
