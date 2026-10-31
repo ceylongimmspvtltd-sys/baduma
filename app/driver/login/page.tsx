@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
@@ -50,7 +51,9 @@ export default function DriverOTPLogin() {
     <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4">
       <div className="w-full max-w-sm p-8 rounded-3xl bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d]">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-[#FFD700] tracking-wider drop-shadow-md mb-2">බැදුම</h1>
+          <div className="relative h-14 w-36 mx-auto mb-3">
+            <Image src="/images/logo-nav.png" alt="බැදුම" fill sizes="144px" className="object-contain drop-shadow-md" />
+          </div>
           <h2 className="text-lg font-bold text-gray-200">Driver Portal</h2>
         </div>
 

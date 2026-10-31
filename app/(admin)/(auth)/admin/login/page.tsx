@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -67,8 +68,9 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md p-8 rounded-[2.5rem] bg-[#121212] shadow-[10px_10px_24px_#070707,-10px_-10px_24px_#1d1d1d] border border-[#1d1d1d]">
         <div className="flex flex-col items-center mb-8">
-          <img src="/images/logo-nav.png" alt="බැදුම" className="h-16 w-auto mb-4 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
-          <h1 className="text-3xl font-black text-[#FFD700] tracking-wide">බැදුම</h1>
+          <div className="relative h-16 w-40 mb-4">
+            <Image src="/images/logo-nav.png" alt="බැදුම" fill sizes="160px" className="object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
+          </div>
           <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mt-1">Master Admin · Secure Sign In</p>
         </div>
 

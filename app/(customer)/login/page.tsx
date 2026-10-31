@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
@@ -58,10 +59,9 @@ export default function CustomerOTPLogin() {
       <div className="w-full max-w-md p-10 rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_0_0_1px_#2a2a2a] border border-[#1d1d1d]">
 
         <div className="text-center mb-10">
-          <img src="/images/logo-nav.png" alt="බැදුම" className="h-16 w-auto mx-auto mb-4 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
-          <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-            බැදුම
-          </h2>
+          <div className="relative h-16 w-40 mx-auto mb-4">
+            <Image src="/images/logo-nav.png" alt="බැදුම" fill sizes="160px" className="object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
+          </div>
           <p className="text-sm text-gray-400 font-bold">
             {step === 'request'
               ? 'Sign In or Create Account — No Password'

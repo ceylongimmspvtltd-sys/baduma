@@ -188,6 +188,14 @@ where email = 'admin@baduma.sl';
 -- .updateUserById with the user id).
 
 -- =====================================================================
+-- BADUMA · Phase 4 — Staff profile fields (full name + contact)
+-- =====================================================================
+
+alter table public.employees
+  add column if not exists full_name text,
+  add column if not exists contact text;
+
+-- =====================================================================
 -- BADUMA · Phase 3 — Customer Loyalty profiles & Employee RBAC accounts
 -- =====================================================================
 
