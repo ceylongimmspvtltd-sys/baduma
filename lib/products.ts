@@ -1,9 +1,9 @@
 /**
- * Baduma.sl — Shared product catalog
+ * බැදුම — Shared product catalog
  *
- * Used by both the ProductMenu (grid) and the dynamic product detail page
- * (`app/product/[id]/page.tsx`). Each product carries its image, price
- * tiers, preparation time, and ingredient list.
+ * Used by the ProductMenu (grid), the dynamic product detail page
+ * (`app/(customer)/product/[id]/page.tsx`), and the Combo / Add-on flows.
+ * Every item carries its image, price, and presentation data.
  */
 
 export interface Product {
@@ -18,6 +18,24 @@ export interface Product {
   description: string;
 }
 
+export interface ComboDeal {
+  id: string;
+  name: string;
+  includes: string[];
+  price: number;
+  save: number;
+  image: string;
+}
+
+export interface AddOnItem {
+  id: string;
+  name: string;
+  price: number;
+  grams: number;
+  volume?: number;
+  image: string;
+}
+
 export const BADUMA_MENU: Product[] = [
   // ───────────────────────── Fried Rice ─────────────────────────
   {
@@ -26,7 +44,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 500,
     priceFull: 750,
-    image: '/images/monday-bowl.jpg',
+    image: '/images/fried-rice-veg.jpg',
     prepTime: 15,
     description: 'A colorful wok-tossed fried rice loaded with fresh garden vegetables.',
     ingredients: ['Steamed Rice', 'Carrots', 'Peas', 'Cabbage', 'Bell Pepper', 'Spring Onions', 'Garlic', 'Soy Sauce', 'Salt', 'Pepper'],
@@ -37,7 +55,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 600,
     priceFull: 850,
-    image: '/images/tuesday-bowl.jpg',
+    image: '/images/fried-rice-egg.jpg',
     prepTime: 15,
     description: 'Classic egg fried rice with scrambled eggs and aromatic garlic.',
     ingredients: ['Steamed Rice', 'Eggs', 'Spring Onions', 'Garlic', 'Soy Sauce', 'Salt', 'Pepper'],
@@ -48,7 +66,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 700,
     priceFull: 1000,
-    image: '/images/wednesday-bowl.jpg',
+    image: '/images/fried-rice-fish.jpg',
     prepTime: 20,
     description: 'Flaked fish fried rice with a light garlicky aroma.',
     ingredients: ['Steamed Rice', 'Fish', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
@@ -59,7 +77,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 700,
     priceFull: 1000,
-    image: '/images/thursday-bowl.jpg',
+    image: '/images/fried-rice-chicken.jpg',
     prepTime: 20,
     description: 'Tender chicken pieces tossed into fragrant fried rice.',
     ingredients: ['Steamed Rice', 'Chicken', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
@@ -70,7 +88,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 1200,
     priceFull: 1400,
-    image: '/images/friday-bowl.jpg',
+    image: '/images/fried-rice-seafood.jpg',
     prepTime: 25,
     description: 'A decadent seafood fried rice with prawns and fish.',
     ingredients: ['Steamed Rice', 'Prawns', 'Fish', 'Garlic', 'Spring Onions', 'Soy Sauce', 'Salt', 'Pepper'],
@@ -92,7 +110,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 1000,
     priceFull: 1300,
-    image: '/images/tuesday-bowl.jpg',
+    image: '/images/set-menu.jpg',
     prepTime: 25,
     description: 'A complete set meal with fried rice and curd sambal.',
     ingredients: ['Steamed Rice', 'Chicken', 'Fish', 'Vegetables', 'Curd Sambal', 'Salt', 'Pepper'],
@@ -103,7 +121,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 1100,
     priceFull: 1400,
-    image: '/images/wednesday-bowl.jpg',
+    image: '/images/nasigurang.jpg',
     prepTime: 25,
     description: 'Sri Lankan nasi gureng with rich rempah and coconut milk.',
     ingredients: ['Rice', 'Chicken', 'Eggs', 'Vegetables', 'Rempah', 'Coconut Milk', 'Salt'],
@@ -114,7 +132,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Fried Rice',
     priceNormal: 1200,
     priceFull: 1500,
-    image: '/images/thursday-bowl.jpg',
+    image: '/images/biriyani.jpg',
     prepTime: 30,
     description: 'Aromatic biriyani layered with chicken, spices, and saffron rice.',
     ingredients: ['Rice', 'Chicken', 'Biryani Masala', 'Yoghurt', 'Onions', 'Cashew', 'Raisins', 'Mint', 'Salt'],
@@ -127,7 +145,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Kottu',
     priceNormal: 700,
     priceFull: 950,
-    image: '/images/friday-bowl.jpg',
+    image: '/images/kottu-chicken.jpg',
     prepTime: 20,
     description: 'The iconic kottu rotti shredded and fried with chicken.',
     ingredients: ['Kottu Rotti', 'Chicken', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
@@ -138,7 +156,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Kottu',
     priceNormal: 700,
     priceFull: 950,
-    image: '/images/monday-bowl.jpg',
+    image: '/images/tuesday-bowl.jpg',
     prepTime: 20,
     description: 'Special chicken kottu with an extra egg and richer gravy.',
     ingredients: ['Kottu Rotti', 'Chicken', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Egg', 'Salt', 'Pepper'],
@@ -149,7 +167,7 @@ export const BADUMA_MENU: Product[] = [
     category: 'Kottu',
     priceNormal: 1000,
     priceFull: 1300,
-    image: '/images/tuesday-bowl.jpg',
+    image: '/images/kottu-seafood.jpg',
     prepTime: 25,
     description: 'Kottu with prawns and fish in a spicy gravy.',
     ingredients: ['Kottu Rotti', 'Prawns', 'Fish', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
@@ -192,7 +210,7 @@ export const BADUMA_MENU: Product[] = [
     name: 'Lava Kottu',
     category: 'Kottu',
     priceFull: 2000,
-    image: '/images/monday-bowl.jpg',
+    image: '/images/kottu-lava.jpg',
     prepTime: 25,
     description: 'The ultimate lava kottu — molten cheese with chicken and veg.',
     ingredients: ['Kottu Rotti', 'Cheese', 'Chicken', 'Cabbage', 'Carrots', 'Onions', 'Green Chilli', 'Salt', 'Pepper'],
@@ -204,7 +222,7 @@ export const BADUMA_MENU: Product[] = [
     name: 'Baduma Special Pasta',
     category: 'Pasta',
     priceNormal: 1000,
-    image: '/images/tuesday-bowl.jpg',
+    image: '/images/pasta-special.jpg',
     prepTime: 20,
     description: 'Our signature pasta with chicken in a creamy garlic parmesan sauce.',
     ingredients: ['Pasta', 'Chicken', 'Cream', 'Garlic', 'Parmesan', 'Tomato', 'Basil', 'Salt', 'Pepper'],
@@ -214,10 +232,79 @@ export const BADUMA_MENU: Product[] = [
     name: 'Chilly Pasta',
     category: 'Pasta',
     priceNormal: 1000,
-    image: '/images/wednesday-bowl.jpg',
+    image: '/images/pasta-chilly.jpg',
     prepTime: 20,
     description: 'A spicy chilli pasta with crisp green peppers and garlic.',
     ingredients: ['Pasta', 'Green Peppers', 'Garlic', 'Chilli Flakes', 'Soy Sauce', 'Salt'],
+  },
+];
+
+/** ───────────────────────── Combo Packages ───────────────────────── */
+export const COMBOS: ComboDeal[] = [
+  {
+    id: 'combo-double-rice',
+    name: '2 Fried Rice + 1 Large Coke',
+    includes: ['2× Fried Rice (FULL portion)', '1× Large Coke (500ml)'],
+    price: 1500,
+    save: 300,
+    image: '/images/combo-double-rice.jpg',
+  },
+  {
+    id: 'combo-kottu-party',
+    name: '2 Kottu + 1 Large Coke',
+    includes: ['2× Kottu (FULL portion)', '1× Large Coke (500ml)'],
+    price: 1600,
+    save: 350,
+    image: '/images/combo-kottu-party.jpg',
+  },
+  {
+    id: 'combo-family-feast',
+    name: 'Family Feast Combo',
+    includes: ['2× Fried Rice (FULL)', '1× Kottu (FULL)', '2× Coke (500ml)'],
+    price: 2600,
+    save: 700,
+    image: '/images/combo-family-feast.jpg',
+  },
+  {
+    id: 'combo-party-pack',
+    name: 'Party Pack Combo',
+    includes: ['3× Fried Rice (FULL)', '1× French Fries', '2× Coke (500ml)'],
+    price: 2900,
+    save: 800,
+    image: '/images/combo-party-pack.jpg',
+  },
+];
+
+/** ───────────────────────── Suggested Add-ons ───────────────────────── */
+export const SUGGESTED_ADDONS: AddOnItem[] = [
+  {
+    id: 'coke',
+    name: 'Coke Bottle',
+    price: 80,
+    grams: 0,
+    volume: 330,
+    image: '/images/addon-coke.jpg',
+  },
+  {
+    id: 'fries',
+    name: 'French Fries',
+    price: 150,
+    grams: 150,
+    image: '/images/addon-fries.jpg',
+  },
+  {
+    id: 'dessert',
+    name: 'Chocolate Brownie',
+    price: 200,
+    grams: 120,
+    image: '/images/addon-dessert.jpg',
+  },
+  {
+    id: 'devilled',
+    name: 'Chicken Devilled',
+    price: 250,
+    grams: 200,
+    image: '/images/addon-devilled.jpg',
   },
 ];
 

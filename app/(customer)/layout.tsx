@@ -17,12 +17,12 @@ export default function CustomerLayout({
       <body className="bg-[#121212] text-gray-200 font-sans min-h-screen flex flex-col selection:bg-[#D4AF37] selection:text-[#121212]">
 
         {/* Secure Public Navigation (Strictly Isolated - No Admin Links) */}
-        <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d,0_1px_0_#2a2a2a] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d]">
+        <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_1px_0_#2a2a2a] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d] border-t-[#D4AF37]/25">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
 
             {/* Primary Logo (Sinhala Only) */}
             <Link href="/" className="flex flex-col">
-              <span className="text-[#D4AF37] font-black text-3xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              <span className="text-[#D4AF37] font-black text-3xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8),0_0_14px_rgba(212,175,55,0.35)]">
                 බැදුම {/*[cite: 6] */}
               </span>
               <span className="text-[10px] text-gray-400 tracking-widest font-semibold uppercase mt-1">
@@ -59,7 +59,7 @@ export default function CustomerLayout({
         </main>
 
         {/* 3D Neumorphic Permanent Footer */}
-        <footer className="mt-16 bg-[#121212] p-8 md:p-12 shadow-[inset_8px_8px_16px_#070707,inset_-8px_-8px_16px_#1d1d1d,0_-1px_0_#2a2a2a] rounded-t-[2.5rem] mx-3 border-t border-[#1d1d1d]">
+        <footer className="mt-16 bg-[#121212] p-8 md:p-12 shadow-[inset_12px_12px_24px_#070707,inset_-12px_-12px_24px_#1d1d1d,0_-1px_0_#2a2a2a] rounded-t-[2.5rem] mx-3 border-t border-[#1d1d1d]">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
 
             {/* Brand Info */}
