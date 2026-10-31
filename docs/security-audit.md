@@ -373,7 +373,7 @@ Managers with `viewer` are still denied; drivers remain barred from `/pos`.
 | `app/(customer)/cart`, `track-orders` | `PlaceholderPage` — no cart/checkout pipeline exists yet, although copy promises ordering. |
 | `app/(admin)/(dashboard)/admin/products/page.tsx` | `insert([row])` uses the array form while other calls use objects (inconsistent, harmless). |
 | ~~promotions mutation bug~~ | **FIXED** — `saveCombo` captured the new id in a local variable instead of mutating state (previously could insert `combo_id: undefined`). |
-| `app/(customer)/cart`, `/track-orders`, `/pos`, `/driver`, `/admin/orders` | Still presentational (no cart state, no orders/checkout pipeline, no live order feed). This is unfinished product scope, not a security defect — see roadmap item 5. |
+| ~~cart / checkout / orders pipeline missing~~ | **BUILT** — see the new §8 "Ordering pipeline": cart context, server-priced `POST /api/orders`, `/track-orders`, POS board, driver runs, `/admin/orders`, role-validated status transitions, order RLS. |
 | `app/driver/page.tsx` | Hard-coded order/customer data (now behind staff auth, but still not wired to the DB). |
 | repo-wide | No tests, no ESLint config, `next-env.d.ts` git-ignored (first `tsc --noEmit` fails on CSS imports until a build runs). |
 
@@ -499,3 +499,51 @@ Runtime checks against `next start` (production build):
 8. **Key hygiene**: rotate the service-role key and the anon key if they were ever committed or
    pasted into a client bundle; confirm `SUPABASE_SERVICE_ROLE_KEY` exists only in Vercel's
    server-side env.
+
+---
+
+## 8. Ordering pipeline (added 2026-11-01)
+
+The storefront previously had no way to actually order, and `/pos`, `/driver` and `/admin/orders`
+were static mock-ups. The pipeline is now complete and covered by `npm run test:orders` (23 checks).
+
+### Data model — `supabase/migrations/20261101_orders.sql`
+
+`orders` (code, customer contact, address, notes, payment method, status, subtotal, delivery fee,
+total, driver) and `order_items` (product id, **name/price snapshot**, size, quantity, line total).
+
+Threat model applied:
+
+| Risk | Control |
+|---|---|
+| Client tampers with prices | The request carries only product ids/sizes/quantities; the API re-reads `normal_price`/`full_price` from `public.products` and recomputes every line total, subtotal, fee and total |
+| Ordering an inactive/deleted product | `is_active` is checked; unknown ids → `409` (not silently priced at 0) |
+| Reading someone else's order (address/phone) | RLS: `auth.uid() = user_id` for `orders`; `order_items` visible only via an `EXISTS` check on the owning order. No client INSERT/UPDATE/DELETE policies exist at all |
+| Forging the order board | `/api/staff/orders` and `/api/admin/orders` verify the HMAC staff session / Supabase admin session and write with the service role |
+| Illegal lifecycle jumps | `ORDER_TRANSITIONS` is enforced server-side per role (`delivered`/`cancelled` are terminal; a driver can only take unassigned runs and cannot rewind) |
+| Cart/order flooding | 10 orders/minute per customer; quantities capped at 20/line, 30 lines/order |
+| Half-written orders | If item insert fails, the order header is deleted again |
+| Price history drift | Item name/price are snapshotted on the order, so later menu edits don't rewrite history |
+
+### Surfaces
+
+- `/` and `/product/[id]` → add to cart (nav badge count)
+- `/cart` → checkout (requires the OTP session) or an OTP prompt
+- `/track-orders` → own orders, status timeline, cancel while pending/accepted
+- `/pos` → live board with role-appropriate actions + driver assignment (Manager/full)
+- `/driver` → assigned runs, tel: link, Google Maps, mark delivered
+- `/admin/orders` → all orders, force status, assign driver
+
+### Verified (against the local emulator, `npm run test:orders`)
+
+```
+✅ anonymous checkout is rejected — 401        ✅ empty cart is rejected — 400
+✅ unknown product is rejected — 409           ✅ customer places an order — 201 BD-AWAK67
+✅ priced server-side (2×700 + 1×750 + 200 = 2350)
+✅ customer sees their own order               ✅ anonymous staff board is rejected — 401
+✅ staff moves order → accepted/preparing/out_for_delivery
+✅ driver cannot rewind the order — 403        ✅ driver marks the order delivered
+✅ delivered order cannot be reopened — 403    ✅ customer cancels a pending order
+✅ a delivered order cannot be cancelled — 409 ✅ admin sees all orders
+🎉 23/23
+```

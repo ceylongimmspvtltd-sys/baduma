@@ -2,6 +2,8 @@ import '../globals.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getSettings } from '@/lib/settings';
+import { CartProvider } from '@/lib/cart';
+import CartNavLink from '@/components/CartNavLink';
 
 export const metadata = {
   title: 'බැදුම | Digital Menu',
@@ -64,6 +66,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   return (
     <html lang="en">
       <body className="bg-[#121212] text-gray-200 font-sans min-h-screen flex flex-col selection:bg-[#FFD700] selection:text-[#121212]">
+        <CartProvider>
 
         {/* Secure Public Navigation (Strictly Isolated - No Admin/Staff/POS/Driver Links) */}
         <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d]">
@@ -75,7 +78,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
             </Link>
             <div className="flex items-center gap-4">
               <NeumorphicLink href="/">Menu</NeumorphicLink>
-              <NeumorphicLink href="/cart">Cart</NeumorphicLink>
+              <CartNavLink />
               <NeumorphicLink href="/track-orders">Track Orders</NeumorphicLink>
               <NeumorphicLink href="/profile">Profile</NeumorphicLink>
             </div>
@@ -173,6 +176,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
             </div>
           </div>
         </footer>
+        </CartProvider>
       </body>
     </html>
   );

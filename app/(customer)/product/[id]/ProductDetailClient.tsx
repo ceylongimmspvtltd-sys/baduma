@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/products';
 import { COMBOS, SUGGESTED_ADDONS, CUSTOM_ADDONS } from '@/lib/products';
+import { useCart } from '@/lib/cart';
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const hasNormal = !!product.priceNormal;
@@ -17,6 +18,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [comboOpen, setComboOpen] = useState(false);
   const [recipeOpen, setRecipeOpen] = useState(false);
   const [promoActive] = useState(true);
+  const [added, setAdded] = useState(false);
+  const cart = useCart();
 
   // Lock body scroll while any modal is open + Esc closes them
   useEffect(() => {
@@ -55,11 +58,26 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const comboTotal = selectedComboObjs.reduce((sum, c) => sum + c.price, 0);
   const comboSavings = selectedComboObjs.reduce((sum, c) => sum + c.save, 0);
 
+  // Add-ons, combos and the 10% promo live in the static catalogue, which the
+  // ordering API cannot price (it only charges products that exist in
+  // `public.products`). They are therefore presented as IN-STORE extras, and the
+  // online total is the base product price — the same figure the server charges.
   const promoDiscount = promoActive ? Math.floor(basePrice * 0.1) : 0;
-  const totalPrice = Math.max(
-    0,
-    basePrice + addonTotal + suggestionTotal + comboTotal - promoDiscount
-  );
+  const totalPrice = basePrice;
+
+  function handleOrderNow() {
+    if (!basePrice) return;
+    cart.add({
+      productId: product.id,
+      name: product.name,
+      image: product.image,
+      size: portion,
+      unitPrice: basePrice,
+      quantity: 1,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  }
 
   // ── Weight / Volume ─────────────────────────────────────
   const baseWeight = portion === 'normal' ? 450 : 700;
@@ -361,19 +379,34 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               )}
             </div>
 
+            <p className="px-2 text-[10px] text-gray-600 font-bold">
+              Add-ons, combo packages and promo discounts shown above apply to in-store orders.
+              Online orders are charged the menu price of the selected portion.
+            </p>
+
             {/* Total Price */}
             <div className="flex items-center justify-between px-5 py-4 rounded-xl bg-[#121212] shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d,0_0_0_1px_#2a2a2a]">
               <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">Total</span>
               <span className="text-2xl font-black text-[#D4AF37]">Rs. {totalPrice}</span>
             </div>
 
-            {/* Order Now */}
-            <Link
-              href="/cart"
-              className="w-full py-5 rounded-2xl font-black text-[#121212] bg-[#D4AF37] shadow-[6px_6px_14px_#070707,-6px_-6px_14px_#8a6d1a] active:shadow-[inset_5px_5px_10px_#8a6d1a,inset_-5px_-5px_10px_#ffea4d] transition-all tracking-wider text-lg hover:brightness-110 text-center block"
-            >
-              Order Now — Rs. {totalPrice}
-            </Link>
+            {/* Order Now — adds the item, then opens the cart */}
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={handleOrderNow}
+                className="w-full py-5 rounded-2xl font-black text-[#121212] bg-[#D4AF37] shadow-[6px_6px_14px_#070707,-6px_-6px_14px_#8a6d1a] active:shadow-[inset_5px_5px_10px_#8a6d1a,inset_-5px_-5px_10px_#ffea4d] transition-all tracking-wider text-lg hover:brightness-110"
+              >
+                {added ? 'Added to cart ✓' : `Add to cart — Rs. ${totalPrice}`}
+              </button>
+              <Link
+                href="/cart"
+                onClick={handleOrderNow}
+                className="w-full py-4 rounded-2xl font-bold text-gray-300 bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] text-center block"
+              >
+                Go to cart &amp; checkout →
+              </Link>
+            </div>
           </div>
         </div>
       </div>
