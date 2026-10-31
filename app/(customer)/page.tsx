@@ -39,6 +39,22 @@ export default function CustomerHomePage() {
   return (
     <div className="flex flex-col gap-10 pt-4">
 
+      {/* ── Daily Offers — Spinning 3D Element ── */}
+      <section className="flex flex-col items-center text-center gap-4 py-6">
+        <div className="relative w-24 h-24 rounded-full bg-[#121212] shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d,0_0_0_1px_#2a2a2a] flex items-center justify-center">
+          <div className="absolute inset-0 animate-spin rounded-full" style={{ animationDuration: '10s' }}>
+            <span className="absolute top-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[7px] font-black tracking-[0.15em] text-[#D4AF37]">
+              ✦ DAILY OFFERS • DAILY OFFERS • DAILY OFFERS ✦
+            </span>
+          </div>
+          <span className="relative z-10 text-2xl">🎁</span>
+        </div>
+        <div>
+          <h1 className="text-2xl font-black text-white tracking-wide">Daily Offers</h1>
+          <p className="text-xs text-gray-400 font-bold mt-1">Fresh deals every day — 10% OFF sitewide + combo savings</p>
+        </div>
+      </section>
+
       {/* 3D Category Filter Pills */}
       <div className="flex flex-wrap gap-4 justify-center">
         {categories.map((cat) => (

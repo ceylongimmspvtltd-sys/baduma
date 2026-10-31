@@ -1,11 +1,17 @@
 import '../globals.css';
 import Link from 'next/link';
+import Image from 'next/image';
 import MobileSidebarDrawer from '@/components/MobileSidebarDrawer';
+import { getLogoForSlot } from '@/lib/logos';
 
 export const metadata = {
   title: 'බැදුම | Digital Menu',
-  description: 'බැදුම - නගරේ රහට * ගානට',
+  description: 'Premium 3D digital menu — freshly cooked fried rice, kottu & pasta in Kandy.',
 };
+
+// Automatically select the best-fit transparent logo for each UI slot
+const navLogo = getLogoForSlot('nav');
+const footerLogo = getLogoForSlot('footer');
 
 export default function CustomerLayout({
   children,
@@ -20,14 +26,9 @@ export default function CustomerLayout({
         <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d,0_1px_0_#2a2a2a] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d] border-t-[#D4AF37]/25">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
 
-            {/* Primary Logo (Sinhala Only) */}
-            <Link href="/" className="flex flex-col">
-              <span className="text-[#D4AF37] font-black text-3xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8),0_0_14px_rgba(212,175,55,0.35)]">
-                බැදුම {/*[cite: 6] */}
-              </span>
-              <span className="text-[10px] text-gray-400 tracking-widest font-semibold uppercase mt-1">
-                නගරේ රහට * ගානට {/*[cite: 6] */}
-              </span>
+            {/* Primary Logo (Transparent Image Asset — auto-sized) */}
+            <Link href="/" className="flex items-center p-1 rounded-2xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d,0_0_0_1px_#2a2a2a]">
+              <Image src={navLogo.src} alt="Baduma" width={49} height={40} className="h-10 w-auto" priority />
             </Link>
 
             {/* Allowed Customer Links Only (desktop) */}
@@ -64,8 +65,7 @@ export default function CustomerLayout({
 
             {/* Brand Info */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d,0_0_0_1px_#2a2a2a]">
-              <h3 className="text-[#D4AF37] text-xl font-black mb-2 tracking-wide">බැදුම</h3>
-              <p className="text-xs text-[#D4AF37]/80 mb-4 font-bold">බැදුම නගරේ රහට * ගානට {/*[cite: 6] */}</p>
+              <Image src={footerLogo.src} alt="Baduma" width={79} height={64} className="h-16 w-auto mb-4" />
               <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
               <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>
             </div>

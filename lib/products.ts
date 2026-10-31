@@ -1,15 +1,15 @@
 /**
- * බැදුම — Shared product catalog
+ * Shared product catalog — main dishes, combo packages, and add-on items.
  *
- * Used by the ProductMenu (grid), the dynamic product detail page
- * (`app/(customer)/product/[id]/page.tsx`), and the Combo / Add-on flows.
- * Every item carries its image, price, and presentation data.
+ * Every item carries its image, price, and presentation data. Used by the
+ * menu grid, the dynamic product detail page, and the combo/recipe/add-on flows.
  */
 
 export interface Product {
   id: string;
   name: string;
   category: 'Fried Rice' | 'Kottu' | 'Pasta' | 'Special';
+  veg: boolean; // drives the dynamic VEG / NON-VEG badge color
   priceNormal?: number;
   priceFull?: number;
   image: string;
@@ -27,7 +27,7 @@ export interface ComboDeal {
   image: string;
 }
 
-export interface AddOnItem {
+export interface SuggestedAddOn {
   id: string;
   name: string;
   price: number;
@@ -36,12 +36,21 @@ export interface AddOnItem {
   image: string;
 }
 
+export interface CustomAddOn {
+  id: string;
+  name: string;
+  price: number;
+  grams: number;
+  volume?: number;
+}
+
 export const BADUMA_MENU: Product[] = [
   // ───────────────────────── Fried Rice ─────────────────────────
   {
     id: 'fr-1',
     name: 'Vegetables Fried Rice',
     category: 'Fried Rice',
+    veg: true,
     priceNormal: 500,
     priceFull: 750,
     image: '/images/fried-rice-veg.jpg',
@@ -53,6 +62,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-2',
     name: 'Egg Fried Rice',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 600,
     priceFull: 850,
     image: '/images/fried-rice-egg.jpg',
@@ -64,6 +74,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-3',
     name: 'Fish Fried Rice',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 700,
     priceFull: 1000,
     image: '/images/fried-rice-fish.jpg',
@@ -75,6 +86,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-4',
     name: 'Chicken Fried Rice',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 700,
     priceFull: 1000,
     image: '/images/fried-rice-chicken.jpg',
@@ -86,6 +98,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-5',
     name: 'Seafood Fried Rice',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 1200,
     priceFull: 1400,
     image: '/images/fried-rice-seafood.jpg',
@@ -97,6 +110,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-6',
     name: 'Mixed Fried Rice',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 1200,
     priceFull: 1400,
     image: '/images/monday-bowl.jpg',
@@ -108,6 +122,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-7',
     name: 'Set Menu',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 1000,
     priceFull: 1300,
     image: '/images/set-menu.jpg',
@@ -119,6 +134,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-8',
     name: 'Nasigurang',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 1100,
     priceFull: 1400,
     image: '/images/nasigurang.jpg',
@@ -130,6 +146,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'fr-9',
     name: 'Biriyani',
     category: 'Fried Rice',
+    veg: false,
     priceNormal: 1200,
     priceFull: 1500,
     image: '/images/biriyani.jpg',
@@ -143,6 +160,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-1',
     name: 'Chicken Kottu (Normal)',
     category: 'Kottu',
+    veg: false,
     priceNormal: 700,
     priceFull: 950,
     image: '/images/kottu-chicken.jpg',
@@ -154,6 +172,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-2',
     name: 'Chicken Kottu (Special/Extra)',
     category: 'Kottu',
+    veg: false,
     priceNormal: 700,
     priceFull: 950,
     image: '/images/tuesday-bowl.jpg',
@@ -165,6 +184,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-3',
     name: 'Seafood Kottu',
     category: 'Kottu',
+    veg: false,
     priceNormal: 1000,
     priceFull: 1300,
     image: '/images/kottu-seafood.jpg',
@@ -176,6 +196,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-4',
     name: 'Mixed Kottu',
     category: 'Kottu',
+    veg: false,
     priceNormal: 1300,
     priceFull: 1700,
     image: '/images/wednesday-bowl.jpg',
@@ -187,6 +208,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-5',
     name: 'Beef Kottu',
     category: 'Kottu',
+    veg: false,
     priceNormal: 1000,
     priceFull: 1250,
     image: '/images/thursday-bowl.jpg',
@@ -198,6 +220,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-6',
     name: 'Cheese Kottu',
     category: 'Kottu',
+    veg: true,
     priceNormal: 1100,
     priceFull: 1500,
     image: '/images/friday-bowl.jpg',
@@ -209,6 +232,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'kt-7',
     name: 'Lava Kottu',
     category: 'Kottu',
+    veg: false,
     priceFull: 2000,
     image: '/images/kottu-lava.jpg',
     prepTime: 25,
@@ -221,6 +245,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'ps-1',
     name: 'Baduma Special Pasta',
     category: 'Pasta',
+    veg: false,
     priceNormal: 1000,
     image: '/images/pasta-special.jpg',
     prepTime: 20,
@@ -231,6 +256,7 @@ export const BADUMA_MENU: Product[] = [
     id: 'ps-2',
     name: 'Chilly Pasta',
     category: 'Pasta',
+    veg: true,
     priceNormal: 1000,
     image: '/images/pasta-chilly.jpg',
     prepTime: 20,
@@ -275,10 +301,20 @@ export const COMBOS: ComboDeal[] = [
   },
 ];
 
-/** ───────────────────────── Suggested Add-ons ───────────────────────── */
-export const SUGGESTED_ADDONS: AddOnItem[] = [
+/** ───────────────────────── Custom Add-ons & Beverages ───────────────────────── */
+export const CUSTOM_ADDONS: CustomAddOn[] = [
+  { id: 'egg', name: 'Extra Egg', price: 100, grams: 50 },
+  { id: 'cheese', name: 'Extra Cheese', price: 150, grams: 60 },
+  { id: 'meat', name: 'Extra Meat', price: 200, grams: 100 },
+  { id: 'coke', name: 'Coke', price: 80, grams: 0, volume: 330 },
+  { id: 'sprite', name: 'Sprite', price: 80, grams: 0, volume: 330 },
+  { id: 'juice', name: 'Fresh Fruit Juice', price: 120, grams: 0, volume: 400 },
+];
+
+/** ───────────────────────── Suggested Add-ons (image cross-sell) ───────────────────────── */
+export const SUGGESTED_ADDONS: SuggestedAddOn[] = [
   {
-    id: 'coke',
+    id: 'coke-bottle',
     name: 'Coke Bottle',
     price: 80,
     grams: 0,
