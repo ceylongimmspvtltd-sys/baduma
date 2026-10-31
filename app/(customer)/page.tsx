@@ -7,14 +7,14 @@ export default function CustomerHomePage() {
       <div className="relative w-full h-[400px] rounded-[2.5rem] bg-[#121212] shadow-[12px_12px_24px_#070707,-12px_-12px_24px_#1d1d1d] border border-[#1d1d1d] overflow-hidden group">
         <Image
           src="/images/hero-banner-mockup.jpg"
-          alt="Baduma.sl Hero Banner"
+          alt="Hero Banner"
           fill
           className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent flex flex-col justify-end p-10">
-          <h1 className="text-5xl font-black text-[#FFD700] drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] mb-2">බැදුම[cite: 4]</h1>
-          <p className="text-lg text-white font-bold tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">නගරේ රහට * ගානට[cite: 4]</p>
+          <h1 className="text-5xl font-black text-[#FFD700] drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] mb-2">බැදුම</h1>
+          <p className="text-lg text-white font-bold tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">නගරේ රහට * ගානට</p>
         </div>
       </div>
 
@@ -38,7 +38,7 @@ export default function CustomerHomePage() {
           <h3 className="text-xl font-bold text-[#FFD700] w-full text-left mb-2">Join Our Community</h3>
           <p className="text-sm text-gray-400 w-full text-left mb-6">Follow us on Instagram and Facebook for the latest offers.</p>
            <button className="w-full py-4 rounded-xl font-black text-gray-300 bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d] active:shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] transition-all tracking-wider hover:text-[#FFD700]">
-            Follow Baduma.sl
+            Follow Us
           </button>
         </div>
       </div>

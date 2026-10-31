@@ -10,9 +10,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = getProductById(id);
-  if (!product) return { title: 'Product | Baduma.sl' };
+  if (!product) return { title: 'Product' };
   return {
-    title: `${product.name} | Baduma.sl`,
+    title: `${product.name}`,
     description: product.description,
   };
 }

@@ -2,8 +2,8 @@ import '../globals.css';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Baduma.sl | Digital Menu',
-  description: 'බැදුම - නගරේ රහට * ගානට',
+  title: 'බැදුම | Digital Menu',
+  description: 'නගරේ රහට * ගානට',
 };
 
 export default function CustomerLayout({
@@ -20,10 +20,10 @@ export default function CustomerLayout({
             
             <Link href="/" className="flex flex-col">
               <span className="text-[#FFD700] font-black text-3xl tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                බැදුම[cite: 4]
+                බැදුම
               </span>
               <span className="text-[10px] text-gray-400 tracking-widest font-semibold uppercase mt-1">
-                නගරේ රහට * ගානට[cite: 4]
+                නගරේ රහට * ගානට
               </span>
             </Link>
 
@@ -54,8 +54,8 @@ export default function CustomerLayout({
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
-              <h3 className="text-[#FFD700] text-xl font-black mb-2 tracking-wide">Baduma.sl</h3>
-              <p className="text-xs text-[#FFD700]/80 mb-4 font-bold">බැදුම නගරේ රහට * ගානට[cite: 4]</p>
+              <h3 className="text-[#FFD700] text-xl font-black mb-2 tracking-wide">බැදුම</h3>
+              <p className="text-xs text-[#FFD700]/80 mb-4 font-bold">නගරේ රහට * ගානට</p>
               <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
               <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>
             </div>
@@ -74,10 +74,10 @@ export default function CustomerLayout({
                   <a href="https://maps.app.goo.gl/8c6MEqyV3ReS7Z5r6?g_st=ic" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#FFD700] transition-all">
                     <span>📍</span> Google Maps
                   </a>
-                  <a href="https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#FFD700] transition-all">
+                  <a href="https://www.instagram.com/badum.sl?obrf=ZTdnZHQzZ3BzbTZ0&utm_source=qr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#8FBC8F] transition-all">
                     <span>📸</span> Instagram
                   </a>
-                  <a href="https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#FFD700] transition-all">
+                  <a href="https://www.facebook.com/share/1FPwigZWbq/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#121212] shadow-[4px_4px_8px_#070707,-4px_-4px_8px_#1d1d1d] hover:shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] text-sm font-bold text-gray-300 hover:text-[#8FBC8F] transition-all">
                     <span>📘</span> Facebook
                   </a>
                 </div>
