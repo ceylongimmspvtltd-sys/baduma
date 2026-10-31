@@ -43,6 +43,7 @@ export default function CustomerOTPLogin() {
     );
 
     if (data?.user) {
+      // OTP තහවුරු වූ වහාම Profile එකට යොමු කිරීම (Seamless Redirect)
       router.push('/profile');
     } else {
       setErrorMsg(error?.message || 'Invalid verification code.');
@@ -56,11 +57,11 @@ export default function CustomerOTPLogin() {
         
         <div className="text-center mb-10">
           <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-md">
-            {step === 'request' ? 'Sign In / Register' : 'Verify Account'}
+            {step === 'request' ? 'Sign In' : 'Verify'}
           </h2>
           <p className="text-sm text-gray-400 font-medium">
             {step === 'request' 
-              ? 'Enter Mobile Number or Email' 
+              ? 'Enter Phone Number or Email' 
               : `Secure code sent to ${identifier}`}
           </p>
         </div>
