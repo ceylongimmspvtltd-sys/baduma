@@ -52,7 +52,6 @@ export default function DriverOTPLogin() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-black text-[#FFD700] tracking-wider drop-shadow-md mb-2">බැදුම</h1>
           <h2 className="text-lg font-bold text-gray-200">Driver Portal</h2>
-          <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">නගරේ රහට * ගානට</p>
         </div>
 
         {step === 'request' ? (

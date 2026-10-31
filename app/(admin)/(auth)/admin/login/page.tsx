@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-md p-8 rounded-[2.5rem] bg-[#121212] shadow-[10px_10px_24px_#070707,-10px_-10px_24px_#1d1d1d] border border-[#1d1d1d]">
         <div className="flex flex-col items-center mb-8">
-          <img src="/images/logo-nav.png" alt="Baduma.sl" className="h-16 w-auto mb-4 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
+          <img src="/images/logo-nav.png" alt="බැදුම" className="h-16 w-auto mb-4 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
           <h1 className="text-3xl font-black text-[#FFD700] tracking-wide">බැදුම</h1>
           <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mt-1">Master Admin · Secure Sign In</p>
         </div>
@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
               autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@baduma.sl"
+              placeholder="admin@example.com"
               className="w-full px-4 py-3 rounded-xl bg-[#121212] text-gray-200 placeholder:text-gray-600 shadow-[inset_4px_4px_8px_#070707,inset_-4px_-4px_8px_#1d1d1d] border border-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 transition-all"
             />
           </div>

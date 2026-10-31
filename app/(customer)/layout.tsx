@@ -2,7 +2,7 @@ import '../globals.css';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Baduma.sl | Digital Menu',
+  title: 'බැදුම | Digital Menu',
   description: 'Hot, Taste the Flavors, and Delivered Fast to Your Doorstep',
 };
 
@@ -58,8 +58,11 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         {/* Secure Public Navigation (Strictly Isolated - No Admin/Staff/POS/Driver Links) */}
         <nav className="sticky top-0 z-50 bg-[#121212] px-6 py-4 shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d] rounded-b-3xl mb-6 mx-3 mt-3 border border-[#1d1d1d]">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <Link href="/" className="flex flex-col" aria-label="Baduma.sl home">
-              <img src="/images/logo-nav.png" alt="Baduma.sl" className="h-9 w-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+            <Link href="/" className="flex items-center gap-3" aria-label="බැදුම home">
+              <img src="/images/logo-nav.png" alt="බැදුම" className="h-9 w-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+              <span className="text-2xl font-black text-[#FFD700] tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                බැදුම
+              </span>
             </Link>
             <div className="flex items-center gap-4">
               <NeumorphicLink href="/">Menu</NeumorphicLink>
@@ -72,12 +75,12 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
         {/* Hero Banner - 4:3 Street View Cover */}
         <header className="relative mx-3 mb-6 max-w-7xl w-auto aspect-[4/3] rounded-3xl overflow-hidden border border-[#1d1d1d] shadow-[8px_8px_16px_#070707,-8px_-8px_16px_#1d1d1d]">
-          <img src="/images/hero-restaurant.jpg" alt="Baduma.sl restaurant street view" className="absolute inset-0 h-full w-full object-cover" />
+          <img src="/images/hero-restaurant.jpg" alt="බැදුම restaurant street view" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/80" />
 
           {/* Logo + Exact Promotional Tagline */}
           <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
-            <img src="/images/logo-large.png" alt="Baduma.sl" className="h-28 sm:h-32 md:h-36 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]" />
+            <img src="/images/logo-large.png" alt="බැදුම" className="h-28 sm:h-32 md:h-36 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.85)]" />
             <h1 className="mt-5 text-xl sm:text-3xl md:text-4xl font-black tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
               <span className="text-red-500">Hot</span> <span className="text-[#FFD700]">Taste the Flavors</span> and Delivered <span className="text-green-500">Fast</span> <span className="text-blue-400">to Your Doorstep</span>
             </h1>
@@ -114,7 +117,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
             {/* Brand Info */}
             <div className="p-6 rounded-3xl bg-[#121212] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#1d1d1d]">
-              <img src="/images/logo-nav.png" alt="Baduma.sl" className="h-8 w-auto mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
+              <img src="/images/logo-nav.png" alt="බැදුම" className="h-8 w-auto mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
               <p className="text-sm text-gray-400">Owner: <span className="text-gray-200 font-bold">Sadun Chamila</span></p>
               <p className="text-sm text-gray-400 mt-2">Baduma.malgammana,<br/>Pilimatalawa, Kandy</p>
             </div>

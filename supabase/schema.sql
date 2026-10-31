@@ -186,3 +186,105 @@ where email = 'admin@baduma.sl';
 
 -- Re-login afterwards so the JWT claim refreshes (or use supabase.auth.admin
 -- .updateUserById with the user id).
+
+-- =====================================================================
+-- BADUMA · Phase 3 — Customer Loyalty profiles & Employee RBAC accounts
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 6. Customer loyalty profiles
+-- ---------------------------------------------------------------------
+
+create table if not exists public.profiles (
+  user_id             uuid primary key references auth.users(id) on delete cascade,
+  points              integer not null default 0,
+  avatar_url          text,
+  two_factor_enabled  boolean not null default false,
+  email_added         boolean not null default false,
+  facebook_linked     boolean not null default false,
+  instagram_linked    boolean not null default false,
+  created_at          timestamptz not null default now(),
+  updated_at          timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+-- Members manage their own profile row.
+drop policy if exists "profiles_own_row" on public.profiles;
+create policy "profiles_own_row" on public.profiles
+  for all to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Master Admin can read all profiles.
+drop policy if exists "profiles_admin_read" on public.profiles;
+create policy "profiles_admin_read" on public.profiles
+  for select to authenticated
+  using ((auth.jwt()::jsonb -> 'user_metadata' ->> 'role') = 'admin');
+
+-- ---------------------------------------------------------------------
+-- 7. Employee accounts (Manager / Kitchen / Driver — RBAC)
+-- ---------------------------------------------------------------------
+
+create table if not exists public.employees (
+  id                uuid primary key default gen_random_uuid(),
+  username          text not null unique,
+  password_hash     text not null,
+  position          text not null check (position in ('Manager', 'Kitchen', 'Driver')),
+  permission_level  text not null check (permission_level in ('full', 'orders', 'delivery', 'viewer')),
+  is_active         boolean not null default true,
+  created_by        uuid,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+alter table public.employees enable row level security;
+
+-- Only the Master Admin (role claim) may read or modify employee accounts.
+drop policy if exists "employees_admin_only" on public.employees;
+create policy "employees_admin_only" on public.employees
+  for all to authenticated
+  using ((auth.jwt()::jsonb -> 'user_metadata' ->> 'role') = 'admin')
+  with check ((auth.jwt()::jsonb -> 'user_metadata' ->> 'role') = 'admin');
+
+-- Employee credential verification (login API). Security definer bypasses RLS;
+-- passwords are scrypt-hashed by the API route before insertion.
+create or replace function public.get_employee_by_username(p_username text)
+returns table(
+  id uuid,
+  username text,
+  password_hash text,
+  position text,
+  permission_level text,
+  is_active boolean
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  return query
+    select e.id, e.username, e.password_hash, e.position, e.permission_level, e.is_active
+    from public.employees e
+    where e.username = p_username;
+end;
+$$;
+
+-- ---------------------------------------------------------------------
+-- 8. Avatar storage bucket
+-- ---------------------------------------------------------------------
+-- Create the bucket in the Supabase Dashboard (Storage → New bucket):
+--   name: avatars | public: ON | RLS: ON
+-- Then apply this policy:
+
+drop policy if exists "avatars_user_prefix" on storage.objects;
+create policy "avatars_user_prefix" on storage.objects
+  for all to authenticated
+  using (
+    bucket_id = 'avatars'
+    and (storage.object.name)::text like (auth.uid() || '%')
+  )
+  with check (
+    bucket_id = 'avatars'
+    and (storage.object.name)::text like (auth.uid() || '%')
+  );
