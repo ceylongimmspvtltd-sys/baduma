@@ -58,7 +58,7 @@ export default function CustomerOTPLogin() {
           <h2 className="text-3xl font-black text-[#FFD700] mb-2 tracking-wide drop-shadow-md">
             {step === 'request' ? 'Sign In' : 'Verify'}
           </h2>
-          <p className="text-sm text-gray-400 font-medium">
+          <p className="text-sm text-gray-400 font-bold">
             {step === 'request'
               ? 'Enter Phone Number or Email'
               : `Secure code sent to ${identifier}`}
@@ -95,7 +95,7 @@ export default function CustomerOTPLogin() {
             <button disabled={loading} className="mt-2 w-full py-5 rounded-2xl font-black text-[#121212] bg-[#FFD700] shadow-[6px_6px_12px_#070707,-6px_-6px_12px_#332b00] active:shadow-[inset_4px_4px_8px_#ccac00,inset_-4px_-4px_8px_#ffea4d] transition-all disabled:opacity-50 tracking-wider">
               {loading ? 'Verifying...' : 'Verify & Enter Profile'}
             </button>
-            <button type="button" onClick={() => setStep('request')} className="text-xs text-[#8FBC8F] hover:text-[#A8D5A8] text-center mt-2 font-bold transition-all">
+            <button type="button" onClick={() => setStep('request')} className="text-xs text-gray-500 hover:text-[#FFD700] text-center mt-2 font-bold transition-all">
               ← Change Phone/Email
             </button>
           </form>
