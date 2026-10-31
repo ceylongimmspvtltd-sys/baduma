@@ -47,13 +47,32 @@ Supabase Dashboard → ඔයාගේ project → **Project Settings → API**:
 
 ### පියවර 2 — Database එක හදන්න
 
-Supabase → **SQL Editor → New query** → මේ files තුනේ content එක **පිළිවෙලට** paste කරලා **Run** කරන්න:
+Supabase → **SQL Editor**. Files **3**ක් — **එකින් එක, මේ පිළිවෙලට** run කරන්න:
 
-1. `supabase/migrations/otp_codes.sql`
-2. `supabase/migrations/20261031_backend_auth_hardening.sql`
-3. `supabase/migrations/20261101_orders.sql`
+| # | File | ඇයි මුලින්ම |
+|---|---|---|
+| 1 | `supabase/migrations/otp_codes.sql` | OTP table (customer login) |
+| 2 | `supabase/migrations/20261031_backend_auth_hardening.sql` | `admin_users`, `is_admin()`, RLS — **admin login එකට මේක අනිවාර්යයි** |
+| 3 | `supabase/migrations/20261101_orders.sql` | orders / order_items |
 
-*(හෝ — `SUPABASE_ACCESS_TOKEN` එකක් තියෙනවා නම්, පියවර 3 script එකම මේක කරලා දෙනවා.)*
+**Tab 3ක් අවශ්‍ය නෑ** — එක tab එකකින් කරන්න පුළුවන්. ඒත් හොඳම ක්‍රමය **එක file එකකට එක query එකක්**:
+
+```
+SQL Editor → New query
+  → file 1 සම්පූර්ණයෙන් copy → paste → Ctrl+Enter (හෝ Run)
+  → "Success. No rows returned" පෙනෙනකම් ඉන්න
+  → Ctrl+A → Delete   (පරණ code එක අයින් කරන්න)
+  → file 2 → paste → Run     ... ඊට පස්සේ file 3
+```
+
+**Rules 4:**
+
+- ❌ Files 3 **එකටම** paste කරන්න එපා — error එකක් ආවොත් මොකද වැරදුනේ කියලා හොයාගන්න බෑ
+- ✅ File එකක් ඉවර වෙලා පෙන්නන්න ඕනේ **"Success. No rows returned"** (හෝ `CREATE TABLE` / `GRANT` වගේ success message). Error එකක් නම් — එතන නවත්තලා, error text එක මට එවන්න
+- ✅ පිළිවෙල **වැදගත්** — 2 කලින් 1 කරන්නත් කමක් නෑ, ඒත් 3 අන්තිමට
+- ✅ ආයේ run කළත් කමක් නෑ — හැම file එකක්ම **idempotent** (දෙපාරක් කළොත් error එකක් එන්නේ නෑ)
+
+*(හෝ — `SUPABASE_ACCESS_TOKEN` එකක් තියෙනවා නම්, පියවර 3 script එකම මේක කරලා දෙනවා. එතකොට මේ පියවරම අවශ්‍ය නෑ.)*
 
 ### පියවර 3 — එක command එකක්
 
