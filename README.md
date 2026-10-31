@@ -26,11 +26,23 @@ Customer routes are publicly reachable and contain no links to `/admin`, `/pos`,
 `/employee`. Backend routes are protected by `middleware.ts`, which verifies the session
 server-side on every request.
 
-### Create the Master Admin login
+### Create the Master Admin login — one command
+
+**New here? Read [`docs/LOGIN.md`](./docs/LOGIN.md) first — it walks through this with the error table.**
 
 ```bash
-SUPABASE_URL=https://YOUR-PROJECT.supabase.co \
-SUPABASE_SERVICE_ROLE_KEY=YOUR-SERVICE-ROLE-KEY \
+export SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+export SUPABASE_SERVICE_ROLE_KEY=YOUR-SERVICE-ROLE-KEY
+npm run setup:backend -- owner@baduma.lk --username baduma-owner
+```
+
+`setup:backend` checks the env, checks (or applies) the schema, creates the account, **proves the
+login works with a real password grant**, and prints the credentials once. Add
+`--verify https://your-site.vercel.app` to also test the deployed app's `/api/admin/login`.
+
+The lower-level command, if you prefer to drive it yourself:
+
+```bash
 node scripts/create-admin.mjs admin@baduma.lk --username baduma-admin
 ```
 
@@ -87,6 +99,8 @@ push/ETA notifications, and multi-branch support.
 
 ## Documentation
 
+- [`docs/LOGIN.md`](./docs/LOGIN.md) — **start here**: how to get a working backend login, and what
+  every error means
 - [`docs/backend-auth-setup.md`](./docs/backend-auth-setup.md) — Supabase configuration, credential
   generation, the exact login code, verification and troubleshooting
 - [`docs/security-audit.md`](./docs/security-audit.md) — full audit: vulnerabilities, root cause of
@@ -101,5 +115,6 @@ npm run build      # production build
 npm run start      # production server
 npm run typecheck  # tsc --noEmit
 npm run verify:security   # security smoke test against BASE_URL
-npm run create:admin      # provision/reset the Master Admin login
+npm run setup:backend     # GUIDED: env + schema + admin user + proven login
+npm run create:admin      # provision/reset the Master Admin login (low level)
 ```
