@@ -53,9 +53,30 @@ function isValidPhone(phone: string): boolean {
   return /^\+?[0-9]{7,15}$/.test(phone);
 }
 
+/**
+ * CORS — Supabase Edge Functions are called from the browser, so the response
+ * must carry these headers and OPTIONS must be answered. Without them the
+ * documented `fetch('/functions/send-whatsapp-otp')` call fails in the browser.
+ */
+const CORS_HEADERS: Record<string, string> = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
+}
+
 export default async function handler(req: Request): Promise<Response> {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS_HEADERS });
+  }
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return json({ error: 'Method not allowed' }, 405);
   }
 
   const body = await req.json().catch(() => ({}));
@@ -63,10 +84,20 @@ export default async function handler(req: Request): Promise<Response> {
   const mode = body.mode === 'custom' ? 'custom' : 'native';
 
   if (!isValidPhone(phone)) {
-    return new Response(JSON.stringify({ error: 'Invalid phone number' }), { status: 400 });
+    return json({ error: 'Invalid phone number' }, 400);
   }
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+  // Throttle: at most 5 OTP requests per phone per 10 minutes (see
+  // supabase/migrations/otp_codes.sql). Stops OTP bombing and SMS/Twilio spend.
+  const { data: allowed, error: throttleError } = await supabase.rpc('otp_request_allowed', {
+    p_phone: phone,
+  });
+  if (!throttleError && allowed === false) {
+    return json({ error: 'Too many code requests. Please wait 10 minutes.' }, 429);
+  }
+
   const twilio = Twilio(TWILIO_ACCOUNT_SID!, TWILIO_AUTH_TOKEN!);
 
   // ---------------------------------------------------------------------------
@@ -75,7 +106,7 @@ export default async function handler(req: Request): Promise<Response> {
   if (mode === 'native') {
     const { error: otpError } = await supabase.auth.signInWithOtp({ phone });
     if (otpError) {
-      return new Response(JSON.stringify({ error: otpError.message }), { status: 400 });
+      return json({ error: otpError.message }, 400);
     }
 
     // Branded supplementary notification via Twilio WhatsApp.
@@ -85,10 +116,7 @@ export default async function handler(req: Request): Promise<Response> {
       body: '🍚 Your Baduma.sl verification code has been sent. Enter it to complete sign-in.',
     });
 
-    return new Response(
-      JSON.stringify({ success: true, mode, message: 'OTP sent via WhatsApp' }),
-      { status: 200 }
-    );
+    return json({ success: true, mode, message: 'OTP sent via WhatsApp' });
   }
 
   // ---------------------------------------------------------------------------
@@ -105,7 +133,7 @@ export default async function handler(req: Request): Promise<Response> {
     used: false,
   });
   if (dbError) {
-    return new Response(JSON.stringify({ error: 'Failed to store OTP' }), { status: 500 });
+    return json({ error: 'Failed to store OTP' }, 500);
   }
 
   // Send via Twilio WhatsApp with a custom approved template.
@@ -115,8 +143,5 @@ export default async function handler(req: Request): Promise<Response> {
     body: `Your Baduma.sl verification code is ${otp}`,
   });
 
-  return new Response(
-    JSON.stringify({ success: true, mode, message: 'OTP sent via WhatsApp' }),
-    { status: 200 }
-  );
+  return json({ success: true, mode, message: 'OTP sent via WhatsApp' });
 }

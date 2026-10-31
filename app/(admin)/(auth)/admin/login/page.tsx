@@ -1,4 +1,4 @@
-// app/(admin)/(auth)/admin/login/page.tsx — Staff & Admin Portal (Email + Password).
+// app/(admin)/(auth)/admin/login/page.tsx — Staff & Admin Portal (Email/Username + Password).
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,58 +6,110 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
+/**
+ * Backend sign-in form.
+ *
+ * The form no longer authenticates with the browser Supabase client. It POSTs
+ * the credentials to `/api/admin/login`, which:
+ *   1. maps a username to its admin email (server-side `admin_users` lookup),
+ *   2. verifies the password with Supabase Auth,
+ *   3. refuses accounts without `app_metadata.role === "admin"`,
+ *   4. sets httpOnly cookies that the middleware verifies on every /admin hit.
+ *
+ * The returned session is used ONLY to hydrate the browser client so the
+ * dashboard's RLS-scoped queries work; authorisation is always the cookie.
+ */
+
+type LoginResponse = {
+  success?: boolean;
+  error?: string;
+  hint?: string;
+  session?: { access_token: string; refresh_token: string; expires_in: number };
+};
+
+/** Only local paths are accepted as redirect targets (blocks open redirects). */
+function safeNextPath(value: string | null): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) {
+    return "/admin";
+  }
+  if (/[\r\n\t]/.test(value)) return "/admin";
+  return value;
+}
+
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextUrl, setNextUrl] = useState("/admin");
 
   useEffect(() => {
-    const m = window.location.search.match(/[?&]next=([^&]+)/);
-    if (m) {
+    const params = new URLSearchParams(window.location.search);
+    const next = safeNextPath(params.get("next"));
+    setNextUrl(next);
+
+    // A valid browser session can outlive the httpOnly cookie (Supabase
+    // refreshed the token after the cookie expired). Re-sync it server-side —
+    // the API re-verifies the token and the admin role — then continue.
+    let cancelled = false;
+    (async () => {
       try {
-        setNextUrl(decodeURIComponent(m[1]));
+        const { data } = await supabase.auth.getSession();
+        const accessToken = data.session?.access_token;
+        if (!accessToken || cancelled) return;
+        const res = await fetch("/api/admin/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          cache: "no-store",
+          body: JSON.stringify({ access_token: accessToken }),
+        });
+        if (res.ok && !cancelled) {
+          router.replace(next);
+          router.refresh();
+        }
       } catch {
-        /* keep default */
+        /* show the form */
       }
-    }
-  }, []);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (authError) throw authError;
-
-      const user = data.user;
-      const role = user?.user_metadata?.role ?? user?.app_metadata?.role;
-      if (role !== "admin") {
-        await supabase.auth.signOut();
-        throw new Error("This account does not have Master Admin access.");
-      }
-
-      // Store the access token in an httpOnly cookie for middleware checks.
-      await fetch("/api/admin/session", {
+      const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: data.session?.access_token,
-          maxAge: data.session?.expires_in,
-        }),
+        credentials: "same-origin",
+        cache: "no-store",
+        body: JSON.stringify({ identifier: identifier.trim(), password }),
       });
+      const json = (await res.json().catch(() => ({}))) as LoginResponse;
 
-      router.push(nextUrl);
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Sign in failed. Please try again.");
+      }
+
+      // Hydrate the browser client for the dashboard's RLS-scoped queries.
+      // The cookies set by the API are what authorise /admin and /api/admin/*.
+      if (json.session?.access_token && json.session?.refresh_token) {
+        await supabase.auth.setSession({
+          access_token: json.session.access_token,
+          refresh_token: json.session.refresh_token,
+        });
+      }
+
+      router.replace(safeNextPath(nextUrl));
       router.refresh();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Sign in failed. Please try again.";
-      setError(message);
+      setError(err instanceof Error ? err.message : "Sign in failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -78,44 +130,55 @@ export default function AdminLoginPage() {
             කරුණාකර ඔබේ ඊමේල් ලිපිනය සහ මුරපදය ඇතුළත් කරන්න
           </p>
           <p className="text-xs text-gray-500 mt-1 text-center">
-            (Please enter your staff Email and Password)
+            (Please enter your staff Email or Username and Password)
           </p>
           <div className="mt-4 px-4 py-2 rounded-xl bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] border border-[#FFD700]/20">
             <p className="text-[11px] font-bold text-gray-400 text-center">
-              🔒 Email + Password sign-in — separate from the customer OTP flow
+              🔒 Email / Username + Password — separate from the customer OTP flow
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="mb-5 p-3 rounded-xl bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] border border-red-500/40 text-red-400 text-sm text-center">
+          <div
+            role="alert"
+            className="mb-5 p-3 rounded-xl bg-[#121212] shadow-[inset_3px_3px_6px_#070707,inset_-3px_-3px_6px_#1d1d1d] border border-red-500/40 text-red-400 text-sm text-center"
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label className="block text-sm font-bold text-gray-300 mb-2">Email Address</label>
+            <label htmlFor="admin-identifier" className="block text-sm font-bold text-gray-300 mb-2">
+              Email or Username
+            </label>
             <input
-              type="email"
+              id="admin-identifier"
+              type="text"
               required
               autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@baduma.com"
-              className="w-full px-4 py-3.5 rounded-xl bg-[#121212] text-gray-200 placeholder:text-gray-600 shadow-[inset_5px_5px_10px_#070707,inset_-5px_-5px_10px_#1d1d1d] border border-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:shadow-[inset_7px_7px_14px_#070707,inset_-7px_-7px_14px_#1d1d1d] transition-all"
+              autoCapitalize="none"
+              spellCheck={false}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="admin@baduma.lk or baduma-admin"
+              className="w-full px-4 py-3.5 rounded-xl bg-[#121212] text-gray-200 placeholder:text-gray-600 shadow-[inset_5px_5px_10px_#070707,inset_-5px_-5px_10px_#1d1d1d] border border-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-300 mb-2">Password</label>
+            <label htmlFor="admin-password" className="block text-sm font-bold text-gray-300 mb-2">
+              Password
+            </label>
             <input
+              id="admin-password"
               type="password"
               required
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3.5 rounded-xl bg-[#121212] text-gray-200 placeholder:text-gray-600 shadow-[inset_5px_5px_10px_#070707,inset_-5px_-5px_10px_#1d1d1d] border border-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:shadow-[inset_7px_7px_14px_#070707,inset_-7px_-7px_14px_#1d1d1d] transition-all"
+              className="w-full px-4 py-3.5 rounded-xl bg-[#121212] text-gray-200 placeholder:text-gray-600 shadow-[inset_5px_5px_10px_#070707,inset_-5px_-5px_10px_#1d1d1d] border border-[#1d1d1d] focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 transition-all"
             />
           </div>
 
@@ -129,7 +192,8 @@ export default function AdminLoginPage() {
         </form>
 
         <p className="mt-6 text-center text-[11px] text-gray-600">
-          Only accounts with the <span className="text-[#FFD700] font-bold">admin</span> role can sign in.
+          Only accounts with the <span className="text-[#FFD700] font-bold">admin</span> role
+          (<span className="font-mono">app_metadata.role</span>) can sign in.
         </p>
       </div>
     </div>

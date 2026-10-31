@@ -68,7 +68,7 @@ export default function CustomerProfilePage() {
         if (err) throw err;
 
         if (!data) {
-          await supabase.from('profiles').insert({ user_id: authUser.id, points: 0 });
+          await supabase.from('profiles').insert({ user_id: authUser.id });
           setProfile({
             user_id: authUser.id,
             points: 0,
@@ -80,13 +80,20 @@ export default function CustomerProfilePage() {
           });
         } else {
           setProfile(data as Profile);
-          // Auto-award email task when the user already has an email on file.
+          // Auto-award the email task when the account already has an email.
+          // Points are awarded by `complete_loyalty_task()` on the server — the
+          // client can no longer write the `points` column itself.
           if (authUser.email && !(data as Profile).email_added) {
             await supabase
               .from('profiles')
-              .update({ email_added: true, points: (data as Profile).points + 75 })
+              .update({ email_added: true })
               .eq('user_id', authUser.id);
-            setProfile((p) => ({ ...(p as Profile), email_added: true, points: (p as Profile).points + 75 }));
+            const { data: newPoints } = await supabase.rpc('complete_loyalty_task', { p_task: 'email' });
+            setProfile((p) => ({
+              ...(p as Profile),
+              email_added: true,
+              points: typeof newPoints === 'number' ? newPoints : (p as Profile).points,
+            }));
           }
         }
       } catch (e) {
@@ -118,16 +125,28 @@ export default function CustomerProfilePage() {
   async function award(key: TaskKey, patch: Partial<Profile>) {
     if (!user || !profile || isDone(key)) return;
     const task = TASKS.find((t) => t.key === key)!;
-    const nextPoints = profile.points + task.points;
-    const next = { ...profile, ...patch, points: nextPoints };
-    setProfile(next);
     setBusy(true);
     try {
-      const { error: err } = await supabase
+      // 1. Persist the non-monetary flag (avatar URL, linked social, …).
+      const { error: patchErr } = await supabase
         .from('profiles')
-        .update({ ...patch, points: nextPoints })
+        .update(patch)
         .eq('user_id', user.id);
-      if (err) throw err;
+      if (patchErr) throw patchErr;
+
+      // 2. Award the points server-side. `complete_loyalty_task` is a SECURITY
+      //    DEFINER RPC with a unique (user_id, task) ledger row, so points can
+      //    be earned once per task and can never be forged by the client.
+      const { data: newPoints, error: pointsErr } = await supabase.rpc('complete_loyalty_task', {
+        p_task: key,
+      });
+      if (pointsErr) throw pointsErr;
+
+      setProfile((current) => ({
+        ...((current ?? profile) as Profile),
+        ...patch,
+        points: typeof newPoints === 'number' ? newPoints : (current ?? profile).points,
+      }));
       setMessage(`+${task.points} points! ${task.title} completed.`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to save progress.');

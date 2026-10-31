@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 const NAV = [
@@ -13,25 +13,67 @@ const NAV = [
   { href: "/admin/products", label: "Menu & Inventory", icon: "🍔" },
   { href: "/admin/promotions", label: "Promotions & Combos", icon: "🎉" },
   { href: "/admin/orders", label: "Live Orders", icon: "🧾" },
+  { href: "/admin/settings", label: "Settings", icon: "⚙️" },
 ];
 
 export default function AdminShellLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
 
+  /**
+   * Keep the httpOnly session cookie in sync with the browser Supabase session.
+   *
+   * Supabase rotates the access token every ~1h (and the refresh token with it),
+   * so the server cookie must be refreshed from the checked client session.
+   * `POST /api/admin/session` re-verifies the token with the Auth server and the
+   * admin role before storing it, so this cannot be used to plant a session.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncCookie(accessToken: string) {
+      try {
+        await fetch("/api/admin/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          cache: "no-store",
+          body: JSON.stringify({ access_token: accessToken }),
+        });
+      } catch {
+        /* middleware will redirect to the login page if the cookie is stale */
+      }
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled && data.session?.access_token) void syncCookie(data.session.access_token);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!cancelled && session?.access_token) void syncCookie(session.access_token);
+    });
+
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
   async function handleLogout() {
     setLoggingOut(true);
     try {
-      await fetch("/api/admin/session", { method: "DELETE" });
+      // Revokes the refresh token and clears the httpOnly admin cookies.
+      await fetch("/api/admin/session", { method: "DELETE", credentials: "same-origin" });
     } catch {
-      /* cookie cleared client-side below */
+      /* fall through: still drop the local browser session */
     }
     try {
+      // Clears the client-side session used by the dashboard's RLS queries.
       await supabase.auth.signOut();
     } catch {
       /* ignore */
     }
-    window.location.href = "/admin/login";
+    window.location.replace("/admin/login");
   }
 
   return (
